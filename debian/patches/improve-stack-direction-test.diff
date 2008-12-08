@@ -1,0 +1,68 @@
+Backported version of this original patch:
+
+From: Neil Jerram <neil@ossau.uklinux.net>
+Date: Fri, 11 Jul 2008 22:30:19 +0000 (+0100)
+Subject: Improve stack direction test
+X-Git-Url: http://git.savannah.gnu.org/gitweb/?p=guile.git;a=commitdiff_plain;h=9143131b2766d1e29e05d61b5021395b4c93a6bc;hp=4ff3575c77f95ed5c86970fa93629ba3cfab1912
+
+Improve stack direction test
+
+	* configure.in: Update stack direction test to be like that in
+	Autoconf _AC_LIBOBJ_ALLOCA and Gnulib; specifically in involving a
+	function calling itself.
+
+Index: sid/configure.in
+===================================================================
+--- sid.orig/configure.in
++++ sid/configure.in
+@@ -1103,15 +1103,44 @@
+ #
+ # Which way does the stack grow?
+ #
++# Following code comes from Autoconf 2.61's internal _AC_LIBOBJ_ALLOCA
++# macro (/usr/share/autoconf/autoconf/functions.m4).  Gnulib has
++# very similar code, so in future we could look at using that.
++#
++# An important detail is that the code involves find_stack_direction
++# calling _itself_ - which means that find_stack_direction (or at
++# least the second find_stack_direction() call) cannot be inlined.
++# If the code could be inlined, that might cause the test to give
++# an incorrect answer.
+ #--------------------------------------------------------------------
+ 
+ SCM_I_GSC_STACK_GROWS_UP=0
+-AC_TRY_RUN(aux (l) unsigned long l;
+-	     { int x; exit (l >= ((unsigned long)&x)); }
+-	   main () { int q; aux((unsigned long)&q); },
+-           [SCM_I_GSC_STACK_GROWS_UP=1],
+-	   [],
+-           [AC_MSG_WARN(Guessing that stack grows down -- see scmconfig.h)])
++AC_CACHE_CHECK([stack direction],
++	       [SCM_I_GSC_STACK_GROWS_UP],
++[AC_RUN_IFELSE([AC_LANG_SOURCE(
++[AC_INCLUDES_DEFAULT
++int
++find_stack_direction ()
++{
++  static char *addr = 0;
++  auto char dummy;
++  if (addr == 0)
++    {
++      addr = &dummy;
++      return find_stack_direction ();
++    }
++  else
++    return (&dummy > addr) ? 1 : -1;
++}
++
++int
++main ()
++{
++  return find_stack_direction () < 0;
++}])],
++	       [SCM_I_GSC_STACK_GROWS_UP=1],
++	       [],
++	       [AC_MSG_WARN(Guessing that stack grows down -- see scmconfig.h)])])
+ 
+ AC_CHECK_SIZEOF(float)
+ if test "$ac_cv_sizeof_float" -le "$ac_cv_sizeof_long"; then

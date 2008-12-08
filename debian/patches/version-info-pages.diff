@@ -1,0 +1,33 @@
+Index: sid/doc/tutorial/Makefile.am
+===================================================================
+--- sid.orig/doc/tutorial/Makefile.am	2006-10-08 19:50:49.000000000 -0700
++++ sid/doc/tutorial/Makefile.am	2006-10-08 19:50:59.000000000 -0700
+@@ -21,6 +21,6 @@
+ 
+ AUTOMAKE_OPTIONS = gnu
+ 
+-info_TEXINFOS = guile-tut.texi
++info_TEXINFOS = guile-tut-1.8.texi
+ 
+ TEXINFO_TEX = ../ref/texinfo.tex
+Index: sid/doc/tutorial/guile-tut.texi
+===================================================================
+--- sid.orig/doc/tutorial/guile-tut.texi	2006-10-08 19:50:49.000000000 -0700
++++ sid/doc/tutorial/guile-tut.texi	2006-10-08 19:59:08.000000000 -0700
+@@ -1,6 +1,6 @@
+ \input texinfo @c -*-texinfo-*-
+ @c %**start of header
+-@setfilename guile-tut.info
++@setfilename guile-tut-1.8.info
+ @settitle Guile Tutorial
+ @set guile-tut
+ 
+@@ -8,7 +8,7 @@
+ 
+ @dircategory The Algorithmic Language Scheme
+ @direntry
+-* Guile Tutorial: (guile-tut).  The Guile tutorial.
++* Guile Tutorial: (guile-tut-1.8).  The Guile tutorial.
+ @end direntry
+ 
+ @setchapternewpage off

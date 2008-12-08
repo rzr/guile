@@ -1,0 +1,10 @@
+version-info-pages.diff
+handle-dfsg-split.diff
+fix-srfi-60-copy-bit-doc.diff
+fix-gnu-kfreebsd-build.diff
+improve-mips-gc-definitions.diff
+improve-stack-direction-test.diff
+improve-stack-direction-test-2.diff
+fix-ia64-continuations.diff
+dont-redefine-jmp_buf.diff
+autofiles.diff

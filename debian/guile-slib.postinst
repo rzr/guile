@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+/usr/bin/guile-@DEB_SRC_EFF_VER@ \
+  -c "(use-modules (ice-9 slib)) (require 'new-catalog)"
+
+#DEBHELPER#

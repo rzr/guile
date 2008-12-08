@@ -1,0 +1,2 @@
+# This is expected.  Guile puts the version in the name.
+@DEB_PKG_BASENAME@-libs binary: package-name-doesnt-match-sonames libguile-srfi-srfi-1-v-3-3 libguile-srfi-srfi-13-14-v-3-3 libguile-srfi-srfi-4-v-3-3 libguile-srfi-srfi-60-v-2-2 libguile17 libguilereadline-v-17-17

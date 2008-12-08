@@ -1,0 +1,406 @@
+#!/usr/bin/make -f
+# debian/rules file for Guile.
+#
+# This file was derived from a public domain file, originally written
+# by Joey Hess (from file included in examples in debhelper package).
+#
+# You can build any of the binary packages independantly, via
+# binary-<package> targets.
+
+# New stable upstream release TODO:
+#   s/A.B/C.D/go in debian/control.
+#   Adjust debian/changelog.
+#   Adjust "ver" variables below.
+#   Adjust debian/guile-libs.lintian.
+
+# auto-update guile files so that changes to guile.* cause regen
+
+SHELL := /bin/bash
+
+# Uncomment this to turn on verbose mode. 
+#export DH_VERBOSE := 1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+deb_src_maj_ver := 1
+deb_src_min_ver := 8
+deb_src_mic_ver := 5
+deb_src_rev := 1
+
+upstream_ver := $(deb_src_maj_ver).$(deb_src_min_ver).$(deb_src_mic_ver)
+
+ifdef deb_src_rev
+  deb_src_ver := $(upstream_ver)+$(deb_src_rev)
+else
+  deb_src_ver := $(upstream_ver)
+endif
+
+deb_src_eff_ver := $(deb_src_maj_ver).$(deb_src_min_ver)
+deb_pkg_basename := guile-$(deb_src_eff_ver)
+
+deb_src_pkg := $(deb_pkg_basename)
+PACKAGE := $(deb_src_pkg)
+
+deb_src_archive := $(deb_src_pkg)_$(deb_src_ver).orig.tar.gz
+deb_src_archive_dir := guile-$(upstream_ver)
+
+deb_trash :=
+
+# If we ever need it, we can create a copy that doesn't assume ./debian/
+define deb_sub
+  perl -p \
+    -e "s|\@UPSTREAM_VER\@|$(upstream_ver)|go;" \
+    -e "s|\@DEB_SRC_VER\@|$(deb_src_ver)|go;" \
+    -e "s|\@DEB_SRC_MAJ_VER\@|$(deb_src_maj_ver)|go;" \
+    -e "s|\@DEB_SRC_MIN_VER\@|$(deb_src_min_ver)|go;" \
+    -e "s|\@DEB_SRC_MIC_VER\@|$(deb_src_mic_ver)|go;" \
+    -e "s|\@DEB_SRC_EFF_VER\@|$(deb_src_eff_ver)|go;" \
+    -e "s|\@DEB_PKG_BASENAME\@|$(deb_pkg_basename)|go;" \
+      < debian/$(1) > debian/$(2)
+endef
+
+# These are used for cross-compiling and for saving the configure script
+# from having to guess our platform (since we know it already)
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+ifeq (alpha,$(shell dpkg-architecture -qDEB_HOST_ARCH))
+  # The -O2 option breaks make check on alpha right now.
+  deb_cflags := -Os -g
+else
+  deb_cflags := -O2 -g
+endif
+
+quilt := QUILT_PATCHES=debian/patches quilt
+
+ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -g
+endif
+ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
+	INSTALL_PROGRAM += -s
+endif
+
+configure_args = \
+  --host=$(DEB_HOST_GNU_TYPE) \
+  --build=$(DEB_BUILD_GNU_TYPE) \
+  --with-threads=no \
+  --prefix=/usr
+
+# It looks like Debian's packaging tools can't handle an empty file,
+# so we use need-empty-autofiles-diff (non-empty) to know when we
+# should create an empty autofiles.diff.
+
+define checkdir
+  @if ! test -e debian/patches/autofiles.diff; \
+  then \
+    if test -e debian/need-empty-autofiles-diff; \
+    then \
+      touch debian/patches/autofiles.diff; \
+    else \
+      echo; \
+      echo "The Debian autofiles patch is not available."; \
+      echo "Please run this command:"; \
+      echo "  debian/rules autofiles-sync"; \
+      echo; \
+      false; \
+    fi; \
+  fi
+  dh_testdir debian/guile.postinst
+  @if ! test -f libguile/guile.c; \
+  then \
+    echo; \
+    echo -n "The upstream source does not appear to be available."; \
+    echo "  Please put the contents"; \
+    echo -n "of $(deb_src_archive) into the"; \
+    echo " current directory."; \
+    echo; \
+    false; \
+  fi
+endef
+
+define patch
+  $(quilt) push -a
+  cd doc/tutorial  && ln -sf guile-tut.texi guile-tut-1.8.texi
+endef
+
+deb_trash += doc/tutorial/guile-tut-1.8.texi
+
+define unpatch
+  test -z "$$($(quilt) applied)" || $(quilt) pop -a
+  rm -f debian/stamp/patch
+  rm -rf .pc
+endef
+
+define cleanup_all
+  #   this goes first so we clean using patched code
+  rm -f debian/stamp/build
+  rm -f guile-procedures.txt
+  -$(MAKE) clean
+  rm -f debian/stamp/config
+  -$(MAKE) -C doc/tutorial maintainer-clean-aminfo
+  -$(MAKE) distclean
+  dh_clean
+  $(unpatch)
+  #   now clean up everything else (mostly ./debian related stuff)
+  find -name '*~' | xargs --no-run-if-empty rm -f
+  rm -rf $(deb_trash)
+  test ! -e debian/stamp || rmdir debian/stamp
+endef
+
+define update_debian_autofiles_quilt
+  $(cleanup_all)
+  # Make sure autofiles.diff exists, otherwise patching will fail.
+  # Also, start from scratch so that changed files (i.e. new upstream source)
+  # won't cause the attempt to apply the old patch to fail.
+  echo -n > debian/patches/autofiles.diff;
+  $(patch)
+  test "$$($(quilt) top)" = autofiles.diff
+  $(quilt) pop
+  mkdir -p debian/tmp-autofiles/old
+  tar cpSf - --exclude ./debian --exclude ./.pc . \
+    | tar -C debian/tmp-autofiles/old -xpSf -
+  cp -a debian/tmp-autofiles/old debian/tmp-autofiles/new
+  # rm aclocal.m4 so it doesn't confuse newer autoconfs, but touch it
+  # so ./Makefile won't be upset if it's not recreated (b/c not needed).
+  #cd debian/tmp-autofiles/new && rm -f aclocal.m4
+  #cd debian/tmp-autofiles/new && touch aclocal.m4
+
+  cd debian/tmp-autofiles/new && autoreconf -i --force
+  cd debian/tmp-autofiles/new/guile-readline && autoreconf -i --force
+
+  cd debian/tmp-autofiles/new && rm -rf autom4te.cache
+  cd debian/tmp-autofiles/new/guile-readline && rm -rf autom4te.cache
+
+  find debian/tmp-autofiles/new -name '*~' | xargs --no-run-if-empty rm -f
+
+  cd debian/tmp-autofiles && diff -ruN old new > new.diff; \
+    test $$? -eq 0 -o $$? -eq 1
+  if test -s debian/tmp-autofiles/new.diff; \
+  then \
+    $(quilt) import -f -P autofiles.diff debian/tmp-autofiles/new.diff; \
+    rm -f debian/need-empty-autofiles-diff; \
+  else \
+    echo yes > debian/need-empty-autofiles-diff; \
+    echo -n > debian/patches/autofiles.diff; \
+  fi
+
+  $(patch)
+  $(quilt) refresh --no-timestamps autofiles.diff
+  $(cleanup_all)
+endef
+deb_trash += debian/tmp-autofiles
+
+# we don't sync this automatically on clean because it's expensive and
+# should only be done by a maintainer with time to deal with any mess
+# it might create.
+autofiles-sync:
+	$(update_debian_autofiles_quilt)
+.PHONY: autofiles-sync
+
+.PHONY: check-diff
+check-diff:
+	$(checkdir)
+	$(cleanup_all)
+	@test -r ../$(deb_src_archive)
+	@rm -rf debian/tmp-diff && mkdir debian/tmp-diff
+	@cd debian/tmp-diff && tar xzpSf ../../../$(deb_src_archive)
+	@cd debian/tmp-diff && mv $(deb_src_archive_dir) orig
+
+	mkdir debian/tmp-diff/new
+	tar cpf - --exclude './debian' --exclude './.pc' . \
+	  | (cd debian/tmp-diff/new && tar xpf -)
+
+	rm -f debian/tmp-diff/{orig,new}/benchmark-suite/Makefile
+
+	@echo
+	@echo "########################################"
+	@echo "### Diffs outside ./debian"
+	@cd debian/tmp-diff && diff -ruN orig new
+	@echo "########################################"
+	@echo "### Empty file list differences"
+	@diff -u \
+	  <(cd debian/tmp-diff/orig && find -size 0) \
+	  <(cd debian/tmp-diff/new && find -size 0) \
+	    > debian/tmp-diff/empty-files.diff || test $$? -eq 1
+	@cat debian/tmp-diff/empty-files.diff
+	@test ! -s debian/tmp-diff/empty-files.diff || false
+	@echo "########################################"
+	@rm -rf debian/tmp-diff
+
+deb_trash += debian/tmp-diff
+
+buildpackage:
+	$(checkdir)
+	dpkg-buildpackage -D -us -uc -rfakeroot -i'\.git|\.pc'
+.PHONY: buildpackage
+
+.PHONY: check-vars
+check-vars:
+	@echo UPSTREAM_VER: $(upstream_ver)
+	@echo DEB_SRC_VER: $(deb_src_ver)
+	@echo DEB_SRC_MAJ_VER: $(deb_src_maj_ver)
+	@echo DEB_SRC_MIN_VER: $(deb_src_min_ver)
+	@echo DEB_SRC_MIC_VER: $(deb_src_mic_ver)
+	@echo DEB_SRC_EFF_VER: $(deb_src_eff_ver)
+	@echo DEB_PKG_BASENAME: $(deb_pkg_basename)
+	@echo
+	@echo deb_src_ver: $(deb_src_ver)
+	@echo deb_src_maj_ver: $(deb_src_maj_ver)
+	@echo deb_src_min_ver: $(deb_src_min_ver)
+	@echo deb_src_mic_ver: $(deb_src_mic_ver)
+	@echo deb_pkg_basenmae: $(deb_pkg_basename)
+	@echo deb_src_archive: $(deb_src_archive)
+	@echo deb_src_archive_dir: $(deb_src_archive_dir)
+
+debian/stamp/patch:
+	$(checkdir)
+	$(patch)
+	mkdir -p $(dir $@) && touch $@
+
+.PHONY: update-debhelper-files
+update-debhelper-files:
+        # guile
+	$(call deb_sub,guile.install,$(deb_pkg_basename).install)
+	$(call deb_sub,guile.menu,$(deb_pkg_basename).menu)
+	$(call deb_sub,guile.postinst,$(deb_pkg_basename).postinst)
+	$(call deb_sub,guile.prerm,$(deb_pkg_basename).prerm)
+	$(call deb_sub,guile.undocumented,$(deb_pkg_basename).undocumented)
+        # guile-dev
+	$(call deb_sub,guile-dev.install,$(deb_pkg_basename)-dev.install)
+	$(call deb_sub,guile-dev.lintian,$(deb_pkg_basename)-dev.lintian)
+        # guile-doc
+	$(call deb_sub,guile-doc.info,$(deb_pkg_basename)-doc.info)
+	$(call deb_sub,guile-doc.install,$(deb_pkg_basename)-doc.install)
+        # guile-libs
+	$(call deb_sub,guile-libs.install,$(deb_pkg_basename)-libs.install)
+	$(call deb_sub,guile-libs.lintian,$(deb_pkg_basename)-libs.lintian)
+#        # guile-slib
+#	$(call deb_sub,guile-slib.postinst,$(deb_pkg_basename)-slib.postinst)
+#	$(call deb_sub,guile-slib.prerm,$(deb_pkg_basename)-slib.prerm)
+
+deb_trash += debian/$(deb_pkg_basename).install
+deb_trash += debian/$(deb_pkg_basename).menu
+deb_trash += debian/$(deb_pkg_basename).postinst
+deb_trash += debian/$(deb_pkg_basename).prerm
+deb_trash += debian/$(deb_pkg_basename).undocumented
+deb_trash += debian/$(deb_pkg_basename)-dev.install
+deb_trash += debian/$(deb_pkg_basename)-dev.lintian
+deb_trash += debian/$(deb_pkg_basename)-doc.info
+deb_trash += debian/$(deb_pkg_basename)-doc.install
+deb_trash += debian/$(deb_pkg_basename)-libs.install
+deb_trash += debian/$(deb_pkg_basename)-libs.lintian
+#deb_trash += debian/$(deb_pkg_basename)-slib.postinst
+#deb_trash += debian/$(deb_pkg_basename)-slib.prerm
+
+debian/stamp/config: debian/stamp/patch
+	CFLAGS="$(deb_cflags)" ./configure ${configure_args}
+	mkdir -p $(dir $@) && touch $@
+
+build: debian/stamp/build
+debian/stamp/build: debian/stamp/config
+	$(checkdir)
+	$(MAKE)
+	unset SHELL && $(MAKE) check
+	mkdir -p $(dir $@) && touch $@
+
+clean:
+	$(checkdir)
+	dh_testroot
+	$(cleanup_all)
+
+deb_guile_bin_path := /usr/bin/guile-$(deb_src_eff_ver)
+
+install: DH_OPTIONS=
+install: build
+	$(checkdir)
+	$(MAKE) -f debian/rules update-debhelper-files
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+
+	gzip -9v < NEWS > NEWS.gz
+
+	mkdir -p debian/tmp/usr/share/lintian/overrides/
+	install --mode=0644 \
+	  debian/$(deb_pkg_basename)-dev.lintian \
+	  debian/tmp/usr/share/lintian/overrides/$(deb_pkg_basename)-dev
+	mkdir -p debian/tmp/usr/share/lintian/overrides/
+	install --mode=0644 \
+	  debian/$(deb_pkg_basename)-libs.lintian \
+	  debian/tmp/usr/share/lintian/overrides/$(deb_pkg_basename)-libs
+
+        # Ignore gds files for the moment.
+	dh_install --fail-missing \
+	  -Xusr/share/info/r5rs.info \
+	  -Xusr/share/emacs/site-lisp/gds-server.el \
+	  -Xusr/share/emacs/site-lisp/gds.el \
+	  -Xusr/share/emacs/site-lisp/gds-scheme.el
+
+	perl -pi \
+	  -e "s|^#!\s*/usr/bin/guile([^-])|#!$(deb_guile_bin_path)\$$1|o" \
+	  -e ' if $$. == 1;' \
+	  debian/$(deb_pkg_basename)-dev/usr/bin/guile-config \
+	  debian/$(deb_pkg_basename)-dev/usr/bin/guile-snarf \
+	  debian/$(deb_pkg_basename)-dev/usr/bin/guile-tools
+
+	cd debian/$(deb_pkg_basename)/usr/bin/ \
+	  && mv guile guile-$(deb_src_eff_ver)
+
+#	mkdir -p \
+#	  debian/$(deb_pkg_basename)-slib/usr/share/guile/$(deb_src_eff_ver)
+#	cd debian/$(deb_pkg_basename)-slib/usr/share/guile/$(deb_src_eff_ver) \
+#	  && ln -s ../../slib .
+
+deb_trash += NEWS.gz
+
+# This single target is used to build all the packages, all at once, or
+# one at a time. So keep in mind: any options passed to commands here will
+# affect _all_ packages. Anything you want to only affect one package
+# should be put in another target, such as the install target.
+binary-common:
+	$(checkdir)
+	dh_testroot
+	dh_installchangelogs
+	dh_installdocs
+	dh_installexamples
+	dh_installmenu
+#	dh_installdebconf
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_installinit
+	dh_installman
+#	dh_installcron
+	dh_installinfo
+        # handle http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=337215
+	perl -wpi -e 's/\\Q//gmo; s/\\E//gmo' \
+	  debian/guile-1.8-doc.postinst.debhelper
+	dh_strip
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdeb
+#	dh_perl
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+# Build architecture independant packages using the common target.
+binary-indep: build install
+	 $(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
+
+# Build architecture dependant packages using the common target.
+binary-arch: build install
+	$(MAKE) -f debian/rules DH_OPTIONS=-a binary-common
+
+# Any other binary targets build just one binary package at a time.
+binary-%: build install
+	make -f debian/rules binary-common DH_OPTIONS=-p$*
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

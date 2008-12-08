@@ -1,0 +1,13 @@
+
+This is the control file entry which will be used once Guile 1.8 and
+SLIB are compatible.
+
+Package: guile-1.8-slib
+Section: devel
+Architecture: all
+Depends: guile-1.8, slib (>= 3a2-3)
+Description: Guile SLIB support
+ SLIB is a portable scheme library meant to provide compatibility and
+ utility functions for all standard scheme implementations.  Once this
+ package is installed SLIB should be available within Guile via
+ (use-modules (ice-9 slib)).

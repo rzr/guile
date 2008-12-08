@@ -1,0 +1,51 @@
+Backported version of this original patch:
+
+From: Neil Jerram <neil@ossau.uklinux.net>
+Date: Thu, 7 Aug 2008 21:24:31 +0000 (+0200)
+Subject: Fix build failure on Debian hppa architecture (bad stack growth detection)
+X-Git-Url: http://git.savannah.gnu.org/gitweb/?p=guile.git;a=commitdiff_plain;h=adacd2dac5ad1c80a8faf8933c228533fb82cc80
+
+Fix build failure on Debian hppa architecture (bad stack growth detection)
+
+	* configure.in (SCM_I_GSC_STACK_GROWS_UP): Remove use of
+	AC_CACHE_CHECK, which was inadvertently causing
+	SCM_I_GSC_STACK_GROWS_UP _always_ to be 0.
+
+Index: sid/ChangeLog
+===================================================================
+--- sid.orig/ChangeLog
++++ sid/ChangeLog
+@@ -1,3 +1,9 @@
++2008-08-07  Neil Jerram  <neil@ossau.uklinux.net>
++
++	* configure.in (SCM_I_GSC_STACK_GROWS_UP): Remove use of
++	AC_CACHE_CHECK, which was inadvertently causing
++	SCM_I_GSC_STACK_GROWS_UP _always_ to be 0.
++
+ 2008-05-07  Ludovic Courtès  <ludo@gnu.org>
+ 
+ 	Guile 1.8.5 released.
+Index: sid/configure.in
+===================================================================
+--- sid.orig/configure.in
++++ sid/configure.in
+@@ -1115,9 +1115,7 @@
+ #--------------------------------------------------------------------
+ 
+ SCM_I_GSC_STACK_GROWS_UP=0
+-AC_CACHE_CHECK([stack direction],
+-	       [SCM_I_GSC_STACK_GROWS_UP],
+-[AC_RUN_IFELSE([AC_LANG_SOURCE(
++AC_RUN_IFELSE([AC_LANG_SOURCE(
+ [AC_INCLUDES_DEFAULT
+ int
+ find_stack_direction ()
+@@ -1140,7 +1138,7 @@
+ }])],
+ 	       [SCM_I_GSC_STACK_GROWS_UP=1],
+ 	       [],
+-	       [AC_MSG_WARN(Guessing that stack grows down -- see scmconfig.h)])])
++	       [AC_MSG_WARN(Guessing that stack grows down -- see scmconfig.h)])
+ 
+ AC_CHECK_SIZEOF(float)
+ if test "$ac_cv_sizeof_float" -le "$ac_cv_sizeof_long"; then
