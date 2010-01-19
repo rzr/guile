@@ -17,6 +17,9 @@
 
 
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include <string.h>
 #include <stdio.h>
@@ -452,6 +455,16 @@ scm_i_symbol_length (SCM sym)
   return STRINGBUF_LENGTH (SYMBOL_STRINGBUF (sym));
 }
 
+size_t
+scm_c_symbol_length (SCM sym)
+#define FUNC_NAME "scm_c_symbol_length"
+{
+  SCM_VALIDATE_SYMBOL (1, sym);
+
+  return STRINGBUF_LENGTH (SYMBOL_STRINGBUF (sym));
+}
+#undef FUNC_NAME
+
 const char *
 scm_i_symbol_chars (SCM sym)
 {
@@ -478,7 +491,7 @@ scm_i_symbol_substring (SCM sym, size_t start, size_t end)
   scm_i_pthread_mutex_lock (&stringbuf_write_mutex);
   SET_STRINGBUF_SHARED (buf);
   scm_i_pthread_mutex_unlock (&stringbuf_write_mutex);
-  return scm_double_cell (STRING_TAG, SCM_UNPACK(buf),
+  return scm_double_cell (RO_STRING_TAG, SCM_UNPACK (buf),
 			  (scm_t_bits)start, (scm_t_bits) end - start);
 }
 
@@ -657,10 +670,17 @@ SCM_DEFINE (scm_string_ref, "string-ref", 2, 0, 0,
 	    "indexing. @var{k} must be a valid index of @var{str}.")
 #define FUNC_NAME s_scm_string_ref
 {
+  size_t len;
   unsigned long idx;
 
   SCM_VALIDATE_STRING (1, str);
-  idx = scm_to_unsigned_integer (k, 0, scm_i_string_length (str)-1);
+
+  len = scm_i_string_length (str);
+  if (SCM_LIKELY (len > 0))
+    idx = scm_to_unsigned_integer (k, 0, len - 1);
+  else
+    scm_out_of_range (NULL, k);
+
   return SCM_MAKE_CHAR (scm_i_string_chars (str)[idx]);
 }
 #undef FUNC_NAME
@@ -680,10 +700,17 @@ SCM_DEFINE (scm_string_set_x, "string-set!", 3, 0, 0,
 	    "@var{str}.")
 #define FUNC_NAME s_scm_string_set_x
 {
+  size_t len;
   unsigned long idx;
 
   SCM_VALIDATE_STRING (1, str);
-  idx = scm_to_unsigned_integer (k, 0, scm_i_string_length(str)-1);
+
+  len = scm_i_string_length (str);
+  if (SCM_LIKELY (len > 0))
+    idx = scm_to_unsigned_integer (k, 0, len - 1);
+  else
+    scm_out_of_range (NULL, k);
+
   SCM_VALIDATE_CHAR (3, chr);
   {
     char *dst = scm_i_string_writable_chars (str);
@@ -1042,7 +1069,7 @@ scm_i_deprecated_string_chars (SCM str)
 		    "SCM_STRING_CHARS does not work with shared substrings.",
 		    SCM_EOL);
 
-  /* We explicitely test for read-only strings to produce a better
+  /* We explicitly test for read-only strings to produce a better
      error message.
   */
 

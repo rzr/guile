@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Software Foundation, Inc.
+## Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Software Foundation, Inc.
 ##
 ## This file is part of GUILE.
 ##
@@ -52,6 +52,7 @@ SCM_TESTS = tests/alist.test			\
 	    tests/numbers.test			\
 	    tests/optargs.test			\
 	    tests/options.test			\
+	    tests/procprop.test			\
 	    tests/poe.test			\
 	    tests/popen.test			\
 	    tests/ports.test			\
@@ -63,6 +64,7 @@ SCM_TESTS = tests/alist.test			\
 	    tests/reader.test			\
 	    tests/receive.test			\
 	    tests/regexp.test			\
+	    tests/signals.test			\
 	    tests/socket.test			\
 	    tests/srcprop.test			\
 	    tests/srfi-1.test			\
@@ -97,7 +99,7 @@ SCM_TESTS = tests/alist.test			\
 SCM_TESTS_DIRS = tests/asmobs \
                  tests/c-api
 
-EXTRA_DIST = guile-test lib.scm $(SCM_TESTS)
+EXTRA_DIST = guile-test lib.scm $(SCM_TESTS) ChangeLog-2008
 
 ## Automake should be able to handle the distribution of tests/asmobs
 ## etc without any help, but not all version can handle 'deep'

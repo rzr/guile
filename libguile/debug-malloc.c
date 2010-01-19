@@ -1,4 +1,4 @@
-/* Copyright (C) 2000, 2006 Free Software Foundation, Inc.
+/* Copyright (C) 2000, 2006, 2008 Free Software Foundation, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -14,6 +14,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include <string.h>
 #include <stdio.h>
@@ -216,7 +220,7 @@ SCM_DEFINE (scm_malloc_stats, "malloc-stats", 0, 0, 0,
   int i;
   for (i = 0; i < malloc_type_size + N_SEEK; ++i)
     if (malloc_type[i].key)
-      res = scm_acons (scm_makfrom0str ((char *) malloc_type[i].key),
+      res = scm_acons (scm_from_locale_string ((char *) malloc_type[i].key),
 		       scm_from_int ((int) malloc_type[i].data),
 		       res);
   return res;

@@ -38,6 +38,25 @@
 #  include <config.h>
 #endif
 
+/* Undefine HAVE_STRUCT_TIMESPEC, because the libguile C code doesn't
+   need it anymore, and because on MinGW:
+
+   - the definition of struct timespec is provided (if at all) by
+     pthread.h
+
+   - pthread.h will _not_ define struct timespec if
+     HAVE_STRUCT_TIMESPEC is 1, because then it thinks that it doesn't
+     need to.
+
+   The libguile C code doesn't need HAVE_STRUCT_TIMESPEC anymore,
+   because the value of HAVE_STRUCT_TIMESPEC has already been
+   incorporated in how scm_t_timespec is defined (in scmconfig.h), and
+   the rest of the libguile C code now just uses scm_t_timespec.
+ */
+#ifdef HAVE_STRUCT_TIMESPEC
+#undef HAVE_STRUCT_TIMESPEC
+#endif
+
 #include <errno.h>
 #include "libguile/__scm.h"
 
@@ -58,20 +77,6 @@
 #include "libguile/variable.h"
 #include "libguile/modules.h"
 #include "libguile/inline.h"
-
-/* SCM_SYSCALL retries system calls that have been interrupted (EINTR).
-   However this can be avoided if the operating system can restart
-   system calls automatically.  We assume this is the case if
-   sigaction is available and SA_RESTART is defined; they will be used
-   when installing signal handlers.
-   */
-
-#ifdef HAVE_RESTARTABLE_SYSCALLS
-#if ! SCM_USE_PTHREAD_THREADS /* However, don't assume SA_RESTART 
-                                 works with pthreads... */
-#define SCM_SYSCALL(line) line
-#endif
-#endif
 
 #ifndef SCM_SYSCALL
 #ifdef vms
@@ -113,7 +118,11 @@
 #endif
 
 /* These names are a bit long, but they make it clear what they represent. */
-#define dirent_or_dirent64              CHOOSE_LARGEFILE(dirent,dirent64)
+#if SCM_HAVE_STRUCT_DIRENT64 == 1
+# define dirent_or_dirent64             CHOOSE_LARGEFILE(dirent,dirent64)
+#else
+# define dirent_or_dirent64             dirent
+#endif
 #define fstat_or_fstat64                CHOOSE_LARGEFILE(fstat,fstat64)
 #define ftruncate_or_ftruncate64        CHOOSE_LARGEFILE(ftruncate,ftruncate64)
 #define lseek_or_lseek64                CHOOSE_LARGEFILE(lseek,lseek64)
@@ -121,7 +130,11 @@
 #define off_t_or_off64_t                CHOOSE_LARGEFILE(off_t,off64_t)
 #define open_or_open64                  CHOOSE_LARGEFILE(open,open64)
 #define readdir_or_readdir64            CHOOSE_LARGEFILE(readdir,readdir64)
-#define readdir_r_or_readdir64_r        CHOOSE_LARGEFILE(readdir_r,readdir64_r)
+#if SCM_HAVE_READDIR64_R == 1
+# define readdir_r_or_readdir64_r       CHOOSE_LARGEFILE(readdir_r,readdir64_r)
+#else
+# define readdir_r_or_readdir64_r       readdir_r
+#endif
 #define stat_or_stat64                  CHOOSE_LARGEFILE(stat,stat64)
 #define truncate_or_truncate64          CHOOSE_LARGEFILE(truncate,truncate64)
 #define scm_from_off_t_or_off64_t       CHOOSE_LARGEFILE(scm_from_off_t,scm_from_int64)

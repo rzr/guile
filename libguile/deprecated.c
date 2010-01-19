@@ -2,7 +2,7 @@
    deprecate something, move it here when that is feasible.
 */
 
-/* Copyright (C) 2003, 2004, 2006 Free Software Foundation, Inc.
+/* Copyright (C) 2003, 2004, 2006, 2008 Free Software Foundation, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,6 +18,10 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include "libguile/_scm.h"
 #include "libguile/async.h"
@@ -319,14 +323,14 @@ scm_load_scheme_module (SCM name)
 static void
 maybe_close_port (void *data, SCM port)
 {
-  SCM except = (SCM)data;
+  SCM except_set = (SCM) data;
 
-  while (!scm_is_null (except))
+  while (!scm_is_null (except_set))
     {
-      SCM p = SCM_COERCE_OUTPORT (SCM_CAR (except));
+      SCM p = SCM_COERCE_OUTPORT (SCM_CAR (except_set));
       if (scm_is_eq (p, port))
 	return;
-      except = SCM_CDR (except);
+      except_set = SCM_CDR (except_set);
     }
 
   scm_close_port (port);

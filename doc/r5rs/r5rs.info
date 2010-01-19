@@ -1,7 +1,7 @@
+This is r5rs.info, produced by makeinfo version 4.8 from r5rs.texi.
+
 INFO-DIR-SECTION The Algorithmic Language Scheme
 START-INFO-DIR-ENTRY
-This is r5rs.info, produced by makeinfo version 4.11 from r5rs.texi.
-
 * R5RS: (r5rs).                 The Revised(5) Report on Scheme.
 END-INFO-DIR-ENTRY
 
@@ -48,14 +48,14 @@ The first three chapters present the fundamental ideas of the language
 and describe the notational conventions used for describing the
 language and for writing programs in the language.
 
-Chapters *note Expressions:: and *note Program structure:: describe the
+Chapters *Note Expressions:: and *Note Program structure:: describe the
 syntax and semantics of expressions, programs, and definitions.
 
-Chapter *note Standard procedures:: describes Scheme's built-in
+Chapter *Note Standard procedures:: describes Scheme's built-in
 procedures, which include all of the language's data manipulation and
 input/output primitives.
 
-Chapter *note Formal syntax and semantics:: provides a formal syntax
+Chapter *Note Formal syntax and semantics:: provides a formal syntax
 for Scheme written in extended BNF, along with a formal denotational
 semantics.  An example of the use of the language follows the formal
 syntax and semantics.
@@ -208,9 +208,9 @@ File: r5rs.info,  Node: Semantics,  Next: Syntax,  Prev: Overview of Scheme,  Up
 =============
 
 This section gives an overview of Scheme's semantics.  A detailed
-informal semantics is the subject of chapters *note Basic concepts::
-through *note Standard procedures::.  For reference purposes, section
-*note Formal semantics:: provides a formal semantics of Scheme.
+informal semantics is the subject of chapters *Note Basic concepts::
+through *Note Standard procedures::.  For reference purposes, section
+*Note Formal semantics:: provides a formal semantics of Scheme.
 
 Following Algol, Scheme is a statically scoped programming language.
 Each use of a variable is associated with a lexically apparent binding
@@ -238,7 +238,7 @@ even if the iterative computation is described by a syntactically
 recursive procedure.  Thus with a properly tail-recursive
 implementation, iteration can be expressed using the ordinary
 procedure-call mechanics, so that special iteration constructs are
-useful only as syntactic sugar.  See section *note Proper tail
+useful only as syntactic sugar.  See section *Note Proper tail
 recursion::.
 
 Scheme procedures are objects in their own right.  Procedures can be
@@ -250,7 +250,7 @@ One distinguishing feature of Scheme is that continuations, which in
 most other languages only operate behind the scenes, also have
 "first-class" status.  Continuations are useful for implementing a wide
 variety of advanced control constructs, including non-local exits,
-backtracking, and coroutines.  See section *note Control features::.
+backtracking, and coroutines.  See section *Note Control features::.
 
 Arguments to Scheme procedures are always passed by value, which means
 that the actual argument expressions are evaluated before the procedure
@@ -289,7 +289,7 @@ The `read' procedure performs syntactic as well as lexical
 decomposition of the data it reads.  The `read' procedure parses its
 input as data (section *note External representation::), not as program.
 
-The formal syntax of Scheme is described in section *note Formal
+The formal syntax of Scheme is described in section *Note Formal
 syntax::.
 
 
@@ -368,7 +368,7 @@ File: r5rs.info,  Node: Entry format,  Next: Evaluation examples,  Prev: Error s
 1.3.3 Entry format
 ------------------
 
-Chapters *note Expressions:: and *note Standard procedures:: are
+Chapters *Note Expressions:: and *Note Standard procedures:: are
 organized into entries.  Each entry describes one language feature or a
 group of related features, where a feature is either a syntactic
 construct or a built-in procedure.  An entry begins with one or more
@@ -385,7 +385,7 @@ for required, primitive features, or
  -- QUALIFIER CATEGORY: TEMPLATE
 
 where QUALIFIER is either "library" or "optional" as defined  in
-section *note Primitive; library; and optional features::.
+section *Note Primitive; library; and optional features::.
 
 If CATEGORY is "syntax", the entry describes an expression type, and
 the template gives the syntax of the expression type.  Components of
@@ -426,7 +426,7 @@ one or two arguments.
 It is an error for an operation to be presented with an argument that it
 is not specified to handle.  For succinctness, we follow the convention
 that if an argument name is also the name of a type listed in section
-*note Disjointness of types::, then that argument must be of the named
+*Note Disjointness of types::, then that argument must be of the named
 type.  For example, the header line for vector-ref given above dictates
 that the first argument to vector-ref must be a vector.  The following
 naming conventions also imply type restrictions:
@@ -474,7 +474,7 @@ means that the expression (* 5 8) evaluates to the object 40.  Or, more
 precisely:  the expression given by the sequence of characters "(* 5
 8)" evaluates, in the initial environment, to an object that may be
 represented externally by the sequence of characters "40".  See section
-*note External representations:: for a discussion of external
+*Note External representations:: for a discussion of external
 representations of objects.
 
 
@@ -510,7 +510,7 @@ File: r5rs.info,  Node: Lexical conventions,  Next: Basic concepts,  Prev: Overv
 
 This section gives an informal account of some of the lexical
 conventions used in writing Scheme programs.  For a formal syntax of
-Scheme, see section *note Formal syntax::.
+Scheme, see section *Note Formal syntax::.
 
 Upper and lower case forms of a letter are never distinguished except
 within character and string constants.  For example, `Foo' is the same
@@ -543,7 +543,7 @@ they were letters.  The following are extended alphabetic characters:
 
      ! $ % & * + - . / : < = > ? @ ^ _ ~
 
-See section *note Lexical structure:: for a formal syntax of
+See section *Note Lexical structure:: for a formal syntax of
 identifiers.
 
 Identifiers have two uses within Scheme programs:
@@ -593,7 +593,7 @@ File: r5rs.info,  Node: Other notations,  Prev: Whitespace and comments,  Up: Le
 2.3 Other notations
 ===================
 
-For a description of the notations used for numbers, see section *note
+For a description of the notations used for numbers, see section *Note
 Numbers::.
 
 . + -
@@ -691,7 +691,7 @@ bind syntactic keywords to those new syntaxes, while other expression
 types create new locations and bind variables to those locations.
 These expression types are called _binding constructs_.
 
-Those that bind syntactic keywords are listed in section *note Macros::.
+Those that bind syntactic keywords are listed in section *Note Macros::.
 The most fundamental of the variable binding constructs is the `lambda'
 expression, because all other variable binding constructs can be
 explained in terms of `lambda' expressions.  The other variable binding
@@ -736,7 +736,7 @@ satisfies none of the above predicates.
 
 Although there is a separate boolean type, any Scheme value can be used
 as a boolean value for the purpose of a conditional test.  As explained
-in section *note Booleans::, all values count as true in such a test
+in section *Note Booleans::, all values count as true in such a test
 except for #f.  This report uses the word "true" to refer to any Scheme
 value except #f, and the word "false" to refer to #f.  
 
@@ -784,7 +784,7 @@ compilers that treat programs as data (or vice versa).
 
 The syntax of external representations of various kinds of objects
 accompanies the description of the primitives for manipulating the
-objects in the appropriate sections of chapter *note Standard
+objects in the appropriate sections of chapter *Note Standard
 procedures::.
 
 
@@ -879,7 +879,7 @@ always determined with respect to a particular lambda expression.
    * If one of the following expressions is in a tail context, then the
      subexpressions shown as <tail expression> are in a tail context.
      These were derived from rules in the grammar given in chapter
-     *note Formal syntax and semantics:: by replacing some occurrences
+     *Note Formal syntax and semantics:: by replacing some occurrences
      of <expression> with <tail expression>.  Only those rules that
      contain tail contexts are shown here.
 
@@ -969,7 +969,7 @@ Primitive expression types include variables and procedure calls.
 Derived expression types are not semantically primitive, but can instead
 be defined as macros.  With the exception of `quasiquote', whose macro
 definition is complex, the derived expressions are classified as
-library features.  Suitable definitions are given in section *note
+library features.  Suitable definitions are given in section *Note
 Derived expression type::.
 
 
@@ -1044,7 +1044,7 @@ File: r5rs.info,  Node: Literal expressions,  Next: Procedure calls,  Prev: Vari
      '#t                                    ==>  #t
      #t                                     ==>  #t
 
-     As noted in section *note Storage model::, it is an error to alter
+     As noted in section *Note Storage model::, it is an error to alter
      a constant (i.e. the value of a literal expression) using a
      mutation procedure like `set-car!' or `string-set!'.
 
@@ -1227,7 +1227,7 @@ File: r5rs.info,  Node: Derived expression types,  Next: Macros,  Prev: Primitiv
 * Quasiquotation::
 
 The constructs in this section are hygienic, as discussed in section
-*note Macros::.  For reference purposes, section *note Derived
+*Note Macros::.  For reference purposes, section *Note Derived
 expression type:: gives macro definitions that will convert most of the
 constructs described in this section into the primitive constructs
 described in the previous section.
@@ -1389,7 +1389,7 @@ recursive definitions.
              (z (+ x y)))
          (* z x)))                          ==>  35
 
-     See also named `let', section *note Iteration::.
+     See also named `let', section *Note Iteration::.
 
 
  -- library syntax: let* <bindings> <body>
@@ -1678,7 +1678,7 @@ transparent" and thus preserve Scheme's lexical scoping [Kohlbecker86],
      (variable or keyword), the identifier will in effect be renamed
      throughout its scope to avoid conflicts with other identifiers.
      Note that a `define' at top level may or may not introduce a
-     binding; see section *note Definitions::.
+     binding; see section *Note Definitions::.
 
    * If a macro transformer inserts a free reference to an identifier,
      the reference refers to the binding that was visible where the
@@ -1695,7 +1695,7 @@ File: r5rs.info,  Node: Binding constructs for syntactic keywords,  Next: Patter
 `Let-syntax' and `letrec-syntax' are analogous to `let' and `letrec',
 but they bind syntactic keywords to macro transformers instead of
 binding variables to locations that contain values.  Syntactic keywords
-may also be bound at top level; see section *note Syntax definitions::.
+may also be bound at top level; see section *Note Syntax definitions::.
 
  -- syntax: let-syntax <bindings> <body>
      _Syntax:_ <Bindings> should have the form
@@ -1892,7 +1892,7 @@ A <transformer spec> has the following form:
      literal identifier is inserted as a bound identifier then it is in
      effect renamed to prevent inadvertent captures of free identifiers.
 
-     As an example, if `let' and `cond' are defined as in section *note
+     As an example, if `let' and `cond' are defined as in section *Note
      Derived expression type:: then they are hygienic (as required) and
      the following is not an error.
 
@@ -1935,7 +1935,7 @@ File: r5rs.info,  Node: Programs,  Next: Definitions,  Prev: Program structure, 
 ============
 
 A Scheme program consists of a sequence of expressions, definitions,
-and syntax definitions.  Expressions are described in chapter *note
+and syntax definitions.  Expressions are described in chapter *Note
 Expressions::; definitions and syntax definitions are the subject of
 the rest of the present chapter.
 
@@ -2175,7 +2175,7 @@ coarsest.  `Eqv?' is slightly less discriminating than `eq?'.
                                             ==>  #t
 
                _Note:_ This assumes that neither OBJ1 nor OBJ2 is an
-               "uninterned symbol" as alluded to in section *note
+               "uninterned symbol" as alluded to in section *Note
                Symbols::.  This report does not presume to specify the
                behavior of `eqv?' on implementation-dependent
                extensions.
@@ -2466,7 +2466,7 @@ Rational operations such as `+' should always produce exact results
 when given exact arguments.  If the operation is unable to produce an
 exact result, then it may either report the violation of an
 implementation restriction or it may silently coerce its result to an
-inexact value.  See section *note Implementation restrictions::.
+inexact value.  See section *Note Implementation restrictions::.
 
 With the exception of `inexact->exact', the operations described in this
 section must generally return inexact results when given any inexact
@@ -2483,7 +2483,7 @@ File: r5rs.info,  Node: Implementation restrictions,  Next: Syntax of numerical 
 ---------------------------------
 
 Implementations of Scheme are not required to implement the whole tower
-of subtypes given in section *note Numerical types::, but they must
+of subtypes given in section *Note Numerical types::, but they must
 implement a coherent subset consistent with both the purposes of the
 implementation and the spirit of the Scheme language.  For example, an
 implementation in which all numbers are real may still be quite useful.
@@ -2571,7 +2571,7 @@ File: r5rs.info,  Node: Syntax of numerical constants,  Next: Numerical operatio
 -----------------------------------
 
 The syntax of the written representations for numbers is described
-formally in section *note Lexical structure::.  Note that case is not
+formally in section *Note Lexical structure::.  Note that case is not
 significant in numerical constants.
 
 A number may be written in binary, octal, decimal, or hexadecimal by
@@ -2613,7 +2613,7 @@ File: r5rs.info,  Node: Numerical operations,  Next: Numerical input and output,
 6.2.5 Numerical operations
 --------------------------
 
-The reader is referred to section *note Entry format:: for a summary of
+The reader is referred to section *Note Entry format:: for a summary of
 the naming conventions used to specify restrictions on the types of
 arguments to numerical routines.
 
@@ -2971,7 +2971,7 @@ numbers.
 
      These procedures implement the natural one-to-one correspondence
      between exact and inexact integers throughout an
-     implementation-dependent range.  See section *note Implementation
+     implementation-dependent range.  See section *Note Implementation
      restrictions::.
 
 
@@ -3217,7 +3217,7 @@ so that arbitrary Scheme programs may be represented as lists.   That
 is, according to Scheme's grammar, every <expression> is also a <datum>
 (see section *note External representation::).  Among other things,
 this permits the use of the `read' procedure to parse Scheme programs.
-See section *note External representations::.
+See section *Note External representations::.
 
  -- procedure: pair? obj
      `Pair?' returns #t if OBJ is a pair, and otherwise returns #f.
@@ -3432,7 +3432,7 @@ applications; for instance, they may be used the way enumerated values
 are used in Pascal.
 
 The rules for writing a symbol are exactly the same as the rules for
-writing an identifier; see sections *note Identifiers:: and *note
+writing an identifier; see sections *Note Identifiers:: and *Note
 Lexical structure::.
 
 It is guaranteed that any symbol that has been returned as part of a
@@ -4484,9 +4484,9 @@ File: r5rs.info,  Node: Input,  Next: Output,  Prev: Ports,  Up: Input and outpu
      Returns #t if a character is ready on the input PORT and returns
      #f otherwise.  If `char-ready' returns #t then the next
      `read-char' operation on the given PORT is guaranteed not to hang.
-     If the PORT is at end of file then `char-ready?' returns #t.  PORT
-     may be omitted, in which case it defaults to the value returned by
-     `current-input-port'.
+     If the PORT is at end of file then `char-ready?' returns #t.
+     PORT may be omitted, in which case it defaults to the value
+     returned by `current-input-port'.
 
           _Rationale:_ `Char-ready?' exists to make it possible for a
           program to accept characters from interactive ports without
@@ -4943,7 +4943,7 @@ File: r5rs.info,  Node: Derived expression type,  Prev: Formal semantics,  Up: F
 
 This section gives macro definitions for the derived expression types in
 terms of the primitive expression types (literal, variable, call,
-`lambda', `if', `set!').  See section *note Control features:: for a
+`lambda', `if', `set!').  See section *Note Control features:: for a
 possible definition of `delay'.
 
 
@@ -5479,12 +5479,12 @@ Concepts
 * backquote:                             Quasiquotation.      (line   8)
 * binding:                               Variables; syntactic keywords; and regions.
                                                               (line  11)
-* binding construct:                      Variables; syntactic keywords; and regions.
+* binding construct:                     Variables; syntactic keywords; and regions.
                                                               (line  23)
 * bound:                                 Variables; syntactic keywords; and regions.
                                                               (line  44)
 * call:                                  Procedure calls.     (line  11)
-* call by need:                            Delayed evaluation.  (line   8)
+* call by need:                          Delayed evaluation.  (line   8)
 * combination:                           Procedure calls.     (line  31)
 * comma:                                 Quasiquotation.      (line  11)
 * comment <1>:                           Lexical structure.   (line  28)
@@ -5496,17 +5496,17 @@ Concepts
 * define-syntax:                         Syntax definitions.  (line   8)
 * definition:                            Definitions.         (line  15)
 * do:                                    Iteration.           (line  10)
-* dotted pair:                            Pairs and lists.     (line   6)
+* dotted pair:                           Pairs and lists.     (line   6)
 * else:                                  Conditional.         (line  20)
-* empty list <1>:                         Pairs and lists.     (line  13)
-* empty list <2>:                         Booleans.            (line  20)
-* empty list:                             Disjointness of types.
+* empty list <1>:                        Pairs and lists.     (line  13)
+* empty list <2>:                        Booleans.            (line  20)
+* empty list:                            Disjointness of types.
                                                               (line  20)
-* equivalence predicate:                  Equivalence predicates.
+* equivalence predicate:                 Equivalence predicates.
                                                               (line   7)
 * error:                                 Error situations and unspecified behavior.
                                                               (line   6)
-* escape procedure:                       Control features.    (line 191)
+* escape procedure:                      Control features.    (line 191)
 * exact:                                 Equivalence predicates.
                                                               (line  53)
 * exactness:                             Exactness.           (line   6)
@@ -5520,30 +5520,30 @@ Concepts
                                                               (line   6)
 * identifier:                            Identifiers.         (line   6)
 * immutable:                             Storage model.       (line  31)
-* implementation restriction <1>:         Implementation restrictions.
+* implementation restriction <1>:        Implementation restrictions.
                                                               (line   6)
-* implementation restriction:             Error situations and unspecified behavior.
+* implementation restriction:            Error situations and unspecified behavior.
                                                               (line  26)
-* improper list:                          Pairs and lists.     (line  57)
+* improper list:                         Pairs and lists.     (line  57)
 * inexact:                               Equivalence predicates.
                                                               (line  53)
-* initial environment:                    Standard procedures. (line  15)
-* internal definition:                    Internal definitions.
+* initial environment:                   Standard procedures. (line  15)
+* internal definition:                   Internal definitions.
                                                               (line  10)
 * keyword <1>:                           Lexical structure.   (line  44)
 * keyword:                               Macros.              (line  19)
-* lazy evaluation:                        Delayed evaluation.  (line   8)
+* lazy evaluation:                       Delayed evaluation.  (line   8)
 * library:                               Primitive; library; and optional features.
                                                               (line  15)
-* library procedure:                      Standard procedures. (line  15)
+* library procedure:                     Standard procedures. (line  15)
 * location:                              Storage model.       (line   7)
 * macro:                                 Macros.              (line  12)
-* macro keyword:                          Macros.              (line  19)
-* macro transformer:                      Macros.              (line  24)
-* macro use:                              Macros.              (line  22)
+* macro keyword:                         Macros.              (line  19)
+* macro transformer:                     Macros.              (line  24)
+* macro use:                             Macros.              (line  22)
 * mutable:                               Storage model.       (line  30)
 * number:                                Numbers.             (line  15)
-* numerical types:                        Numerical types.     (line   6)
+* numerical types:                       Numerical types.     (line   6)
 * object:                                Semantics.           (line  16)
 * optional:                              Primitive; library; and optional features.
                                                               (line   7)
@@ -5551,30 +5551,30 @@ Concepts
 * port:                                  Ports.               (line   8)
 * predicate:                             Equivalence predicates.
                                                               (line   6)
-* procedure call:                         Procedure calls.     (line  11)
+* procedure call:                        Procedure calls.     (line  11)
 * promise <1>:                           Control features.    (line  79)
 * promise:                               Delayed evaluation.  (line  10)
-* proper tail recursion:                   Proper tail recursion.
+* proper tail recursion:                 Proper tail recursion.
                                                               (line   6)
-* referentially transparent:              Macros.              (line  41)
+* referentially transparent:             Macros.              (line  41)
 * region <1>:                            Iteration.           (line  34)
 * region <2>:                            Binding constructs.  (line   8)
 * region <3>:                            Assignments.         (line   9)
 * region:                                Variables; syntactic keywords; and regions.
                                                               (line  34)
-* simplest rational:                      Numerical operations.
+* simplest rational:                     Numerical operations.
                                                               (line 255)
-* syntactic keyword <1>:                  Lexical structure.   (line  44)
-* syntactic keyword <2>:                  Macros.              (line  19)
-* syntactic keyword <3>:                  Variables; syntactic keywords; and regions.
+* syntactic keyword <1>:                 Lexical structure.   (line  44)
+* syntactic keyword <2>:                 Macros.              (line  19)
+* syntactic keyword <3>:                 Variables; syntactic keywords; and regions.
                                                               (line   8)
-* syntactic keyword:                      Identifiers.         (line  41)
-* syntax definition:                      Syntax definitions.  (line   8)
-* tail call:                              Proper tail recursion.
+* syntactic keyword:                     Identifiers.         (line  41)
+* syntax definition:                     Syntax definitions.  (line   8)
+* tail call:                             Proper tail recursion.
                                                               (line  42)
 * token:                                 Lexical structure.   (line   6)
-* top level environment <1>:               Standard procedures. (line  15)
-* top level environment:                   Variables; syntactic keywords; and regions.
+* top level environment <1>:             Standard procedures. (line  15)
+* top level environment:                 Variables; syntactic keywords; and regions.
                                                               (line  44)
 * true <1>:                              Booleans.            (line   9)
 * true <2>:                              Conditional.         (line  22)
@@ -5590,8 +5590,8 @@ Concepts
                                                               (line  44)
 * unspecified:                           Error situations and unspecified behavior.
                                                               (line  35)
-* valid indexes <1>:                      Vectors.             (line  13)
-* valid indexes:                          Strings.             (line  22)
+* valid indexes <1>:                     Vectors.             (line  13)
+* valid indexes:                         Strings.             (line  22)
 * variable <1>:                          Lexical structure.   (line  52)
 * variable <2>:                          Variable references. (line   7)
 * variable <3>:                          Variables; syntactic keywords; and regions.
@@ -5606,7 +5606,6 @@ Procedures
  [index ]
 * Menu:
 
-*          ...:                                   Pairs and lists.     (line 154)
 * ':                                     Literal expressions. (line   8)
 * *:                                     Numerical operations.
                                                               (line 115)
@@ -5871,6 +5870,7 @@ Procedures
 * write-char:                            Output.              (line  50)
 * zero?:                                 Numerical operations.
                                                               (line  88)
+*          ...:                          Pairs and lists.     (line 154)
 
 References
 ==========
@@ -5912,91 +5912,91 @@ References
 
 
 Tag Table:
-Node: Top243
-Node: Introduction2481
-Node: Background4262
-Node: Acknowledgements5787
-Node: Overview of Scheme7501
-Node: Semantics7715
-Node: Syntax11370
-Node: Notation and terminology12215
-Node: Primitive; library; and optional features12532
-Node: Error situations and unspecified behavior13546
-Node: Entry format15364
-Node: Evaluation examples18129
-Node: Naming conventions18820
-Node: Lexical conventions19645
-Node: Identifiers20248
-Node: Whitespace and comments21686
-Node: Other notations22877
-Node: Basic concepts25004
-Node: Variables; syntactic keywords; and regions25295
-Node: Disjointness of types27884
-Node: External representations28875
-Node: Storage model31241
-Node: Proper tail recursion33107
-Node: Expressions38437
-Node: Primitive expression types39077
-Node: Variable references39391
-Node: Literal expressions39991
-Node: Procedure calls41775
-Node: Procedures43955
-Node: Conditionals46905
-Node: Assignments47851
-Node: Derived expression types48485
-Node: Conditional49091
-Node: Binding constructs53999
-Node: Sequencing58041
-Node: Iteration58723
-Node: Delayed evaluation61909
-Node: Quasiquotation62649
-Node: Macros65522
-Node: Binding constructs for syntactic keywords67544
-Node: Pattern language70328
-Node: Program structure76937
-Node: Programs77143
-Node: Definitions78454
-Node: Top level definitions79468
-Node: Internal definitions80473
-Node: Syntax definitions81994
-Node: Standard procedures83391
-Node: Equivalence predicates84644
-Node: Numbers94078
-Node: Numerical types95381
-Node: Exactness97149
-Node: Implementation restrictions98874
-Node: Syntax of numerical constants103536
-Node: Numerical operations105620
-Node: Numerical input and output120289
-Node: Other data types123723
-Node: Booleans124116
-Node: Pairs and lists126095
-Node: Symbols137094
-Node: Characters141311
-Node: Strings146077
-Node: Vectors151486
-Node: Control features154850
-Node: Eval170062
-Node: Input and output172716
-Node: Ports172904
-Node: Input176679
-Node: Output180438
-Node: System interface182638
-Node: Formal syntax and semantics184227
-Node: Formal syntax184598
-Node: Lexical structure185320
-Node: External representation188671
-Node: Expression189374
-Node: Quasiquotations191576
-Node: Transformers192934
-Node: Programs and definitions193845
-Node: Formal semantics194426
-Node: Derived expression type194992
-Node: Notes200573
-Node: Language changes200724
-Node: Additional material202474
-Node: Example202827
-Node: Bibliography206648
-Node: Index212315
+Node: Top242
+Node: Introduction2480
+Node: Background4261
+Node: Acknowledgements5786
+Node: Overview of Scheme7500
+Node: Semantics7714
+Node: Syntax11369
+Node: Notation and terminology12214
+Node: Primitive; library; and optional features12531
+Node: Error situations and unspecified behavior13545
+Node: Entry format15363
+Node: Evaluation examples18128
+Node: Naming conventions18819
+Node: Lexical conventions19644
+Node: Identifiers20247
+Node: Whitespace and comments21685
+Node: Other notations22876
+Node: Basic concepts25003
+Node: Variables; syntactic keywords; and regions25294
+Node: Disjointness of types27883
+Node: External representations28874
+Node: Storage model31240
+Node: Proper tail recursion33106
+Node: Expressions38436
+Node: Primitive expression types39076
+Node: Variable references39390
+Node: Literal expressions39990
+Node: Procedure calls41774
+Node: Procedures43954
+Node: Conditionals46904
+Node: Assignments47850
+Node: Derived expression types48484
+Node: Conditional49090
+Node: Binding constructs53998
+Node: Sequencing58040
+Node: Iteration58722
+Node: Delayed evaluation61908
+Node: Quasiquotation62648
+Node: Macros65521
+Node: Binding constructs for syntactic keywords67543
+Node: Pattern language70327
+Node: Program structure76936
+Node: Programs77142
+Node: Definitions78453
+Node: Top level definitions79467
+Node: Internal definitions80472
+Node: Syntax definitions81993
+Node: Standard procedures83390
+Node: Equivalence predicates84643
+Node: Numbers94077
+Node: Numerical types95380
+Node: Exactness97148
+Node: Implementation restrictions98873
+Node: Syntax of numerical constants103535
+Node: Numerical operations105619
+Node: Numerical input and output120288
+Node: Other data types123722
+Node: Booleans124115
+Node: Pairs and lists126094
+Node: Symbols137093
+Node: Characters141310
+Node: Strings146076
+Node: Vectors151485
+Node: Control features154849
+Node: Eval170061
+Node: Input and output172715
+Node: Ports172903
+Node: Input176678
+Node: Output180436
+Node: System interface182636
+Node: Formal syntax and semantics184225
+Node: Formal syntax184596
+Node: Lexical structure185318
+Node: External representation188669
+Node: Expression189372
+Node: Quasiquotations191574
+Node: Transformers192932
+Node: Programs and definitions193843
+Node: Formal semantics194424
+Node: Derived expression type194990
+Node: Notes200571
+Node: Language changes200722
+Node: Additional material202472
+Node: Example202825
+Node: Bibliography206646
+Node: Index212313
 
 End Tag Table

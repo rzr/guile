@@ -2,16 +2,16 @@ Source: guile-1.8
 Section: interpreters
 Priority: optional
 Maintainer: Rob Browning <rlb@defaultvalue.org>
-Build-Depends: libtool, debhelper (>= 5), quilt, libncurses5-dev, libreadline5-dev, libltdl3-dev, libgmp3-dev, texinfo
+Build-Depends: libtool, debhelper (>= 5), quilt, libncurses5-dev, libreadline6-dev, libltdl3-dev, libgmp3-dev, texinfo
 Build-Conflicts: ash (<= 0.3.8-31)
 Standards-Version: 3.7.2
 
 Package: guile-1.8
-Section: interpreters
+Section: lisp
 Architecture: any
 Provides: guile
 Conflicts: libguile-dev (<= 1:1.4-24)
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: guile-1.8-doc
 Description: The GNU extension language and Scheme interpreter
  Guile is a Scheme implementation designed for real world programming,
@@ -21,11 +21,11 @@ Description: The GNU extension language and Scheme interpreter
  other applications via libguile.
 
 Package: guile-1.8-dev
-Section: devel
+Section: lisp
 Architecture: any
 Provides: libguile-dev
 Conflicts: libguile-dev, guile-1.6 (<< 1.6.8-5)
-Depends: ${shlibs:Depends}, guile-1.8, libc6-dev, libncurses5-dev, libreadline5-dev, libltdl3-dev, libgmp3-dev
+Depends: ${shlibs:Depends}, guile-1.8, libc6-dev, libncurses5-dev, libreadline6-dev, libltdl3-dev, libgmp3-dev, ${misc:Depends}
 Description: Development files for Guile 1.8
  This package contains files needed for development using Guile 1.8.
  .
@@ -38,6 +38,7 @@ Description: Development files for Guile 1.8
 Package: guile-1.8-doc
 Architecture: all
 Section: doc
+Depends: dpkg (>= 1.15.4) | install-info, ${misc:Depends}
 Suggests: guile-1.8-doc-non-dfsg
 Description: Documentation for Guile 1.8
  This package contains all of the Guile documentation that is covered
@@ -52,9 +53,9 @@ Description: Documentation for Guile 1.8
  other applications via libguile.
 
 Package: guile-1.8-libs
-Section: libs
+Section: lisp
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Main Guile libraries
  Guile is a Scheme implementation designed for real world programming,
  providing a rich Unix interface, a module system, an interpreter, and

@@ -1,0 +1,105 @@
+Index: sid/libguile/__scm.h
+===================================================================
+--- sid.orig/libguile/__scm.h
++++ sid/libguile/__scm.h
+@@ -386,21 +386,23 @@
+ 
+ #ifdef vms
+ # ifndef CHEAP_CONTINUATIONS
+-   typedef int jmp_buf[17];
+-   extern int setjump(jmp_buf env);
+-   extern int longjump(jmp_buf env, int ret);
+-#  define setjmp setjump
+-#  define longjmp longjump
++   typedef int scm_jmp_buf[17];
++   extern int setjump(scm_jmp_buf env);
++   extern int longjump(scm_jmp_buf env, int ret);
++#  define scm_setjmp setjump
++#  define scm_longjmp longjump
++#  define SCM_DEFINES_JMP_BUF
+ # else
+ #  include <setjmp.h>
+ # endif
+ #else				/* ndef vms */
+ # ifdef _CRAY1
+-    typedef int jmp_buf[112];
+-    extern int setjump(jmp_buf env);
+-    extern int longjump(jmp_buf env, int ret);
+-#  define setjmp setjump
+-#  define longjmp longjump
++    typedef int scm_jmp_buf[112];
++    extern int setjump(scm_jmp_buf env);
++    extern int longjump(scm_jmp_buf env, int ret);
++#  define scm_setjmp setjump
++#  define scm_longjmp longjump
++#  define SCM_DEFINES_JMP_BUF
+ # else				/* ndef _CRAY1 */
+ #  if defined (__ia64__)
+ /* For IA64, emulate the setjmp API using getcontext. */
+@@ -409,15 +411,19 @@
+     typedef struct {
+       ucontext_t ctx;
+       int fresh;
+-    } jmp_buf;
+-#   define setjmp(JB)				        \
++    } scm_jmp_buf;
++#   define scm_setjmp(JB)			        \
+       ( (JB).fresh = 1,				        \
+         getcontext (&((JB).ctx)),			\
+         ((JB).fresh ? ((JB).fresh = 0, 0) : 1) )
+-#   define longjmp(JB,VAL) scm_ia64_longjmp (&(JB), VAL)
+-    void scm_ia64_longjmp (jmp_buf *, int);
++#   define scm_longjmp(JB,VAL) scm_ia64_longjmp (&(JB), VAL)
++    void scm_ia64_longjmp (scm_jmp_buf *, int);
++#   define SCM_DEFINES_JMP_BUF
+ #  else                 	/* ndef __ia64__ */
+ #   include <setjmp.h>
++    typedef jmp_buf scm_jmp_buf;
++#   define scm_setjmp setjmp
++#   define scm_longjmp longjmp
+ #  endif			/* ndef __ia64__ */
+ # endif				/* ndef _CRAY1 */
+ #endif				/* ndef vms */
+Index: sid/libguile/_scm.h
+===================================================================
+--- sid.orig/libguile/_scm.h
++++ sid/libguile/_scm.h
+@@ -60,6 +60,12 @@
+ #include <errno.h>
+ #include "libguile/__scm.h"
+ 
++#ifdef SCM_DEFINES_JMP_BUF
++typedef scm_jmp_buf jmp_buf;
++#define setjmp(JB) scm_setjmp(JB)
++#define longjmp(JB,VAL) scm_longjmp(JB,VAL)
++#endif
++
+ /* Include headers for those files central to the implementation.  The
+    rest should be explicitly #included in the C files themselves.  */
+ #include "libguile/error.h"	/* Everyone signals errors.  */
+Index: sid/libguile/continuations.h
+===================================================================
+--- sid.orig/libguile/continuations.h
++++ sid/libguile/continuations.h
+@@ -43,7 +43,7 @@
+ typedef struct 
+ {
+   SCM throw_value;
+-  jmp_buf jmpbuf;
++  scm_jmp_buf jmpbuf;
+   SCM dynenv;
+ #ifdef __ia64__
+   void *backing_store;
+Index: sid/libguile/threads.h
+===================================================================
+--- sid.orig/libguile/threads.h
++++ sid/libguile/threads.h
+@@ -107,7 +107,7 @@
+   /* For keeping track of the stack and registers. */
+   SCM_STACKITEM *base;
+   SCM_STACKITEM *top;
+-  jmp_buf regs;
++  scm_jmp_buf regs;
+ #ifdef __ia64__
+   void *register_backing_store_base;
+   scm_t_contregs *pending_rbs_continuation;

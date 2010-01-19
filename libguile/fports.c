@@ -19,7 +19,7 @@
 
 #define _LARGEFILE64_SOURCE      /* ask for stat64 etc */
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
@@ -828,10 +828,11 @@ fport_flush (SCM port)
 	    {
 	      const char *msg = "Error: could not flush file-descriptor ";
 	      char buf[11];
+	      size_t written;
 
-	      write (2, msg, strlen (msg));
+	      written = write (2, msg, strlen (msg));
 	      sprintf (buf, "%d\n", fp->fdes);
-	      write (2, buf, strlen (buf));
+	      written = write (2, buf, strlen (buf));
 
 	      count = remaining;
 	    }

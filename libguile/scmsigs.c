@@ -18,7 +18,7 @@
 
 
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
@@ -108,10 +108,20 @@ static SIGRETTYPE (*orig_handlers[NSIG])(int);
 #endif
 
 static SCM
-close_1 (SCM proc, SCM arg)
+handler_to_async (SCM handler, int signum)
 {
-  return scm_primitive_eval_x (scm_list_3 (scm_sym_lambda, SCM_EOL,
-					   scm_list_2 (proc, arg)));
+  if (scm_is_false (handler))
+    return SCM_BOOL_F;
+  else
+    {
+      SCM async = scm_primitive_eval_x (scm_list_3 (scm_sym_lambda, SCM_EOL,
+						    scm_list_2 (handler,
+								scm_from_int (signum))));
+#if !SCM_USE_PTHREAD_THREADS
+      async = scm_cons (async, SCM_BOOL_F);
+#endif
+      return async;
+    }
 }
 
 #if SCM_USE_PTHREAD_THREADS
@@ -127,8 +137,10 @@ static int signal_pipe[2];
 static SIGRETTYPE
 take_signal (int signum)
 {
+  size_t count;
   char sigbyte = signum;
-  write (signal_pipe[1], &sigbyte, 1);
+
+  count = write (signal_pipe[1], &sigbyte, 1);
 
 #ifndef HAVE_SIGACTION
   signal (signum, take_signal);
@@ -237,23 +249,10 @@ ensure_signal_delivery_thread ()
 #endif /* !SCM_USE_PTHREAD_THREADS */
 
 static void
-install_handler (int signum, SCM thread, SCM handler)
+install_handler (int signum, SCM thread, SCM handler, SCM async)
 {
-  if (scm_is_false (handler))
-    {
-      SCM_SIMPLE_VECTOR_SET (*signal_handlers, signum, SCM_BOOL_F);
-      SCM_SIMPLE_VECTOR_SET (signal_handler_asyncs, signum, SCM_BOOL_F);
-    }
-  else
-    {
-      SCM async = close_1 (handler, scm_from_int (signum));
-#if !SCM_USE_PTHREAD_THREADS
-      async = scm_cons (async, SCM_BOOL_F);
-#endif
-      SCM_SIMPLE_VECTOR_SET (*signal_handlers, signum, handler);
-      SCM_SIMPLE_VECTOR_SET (signal_handler_asyncs, signum, async);
-    }
-
+  SCM_SIMPLE_VECTOR_SET (*signal_handlers, signum, handler);
+  SCM_SIMPLE_VECTOR_SET (signal_handler_asyncs, signum, async);
   SCM_SIMPLE_VECTOR_SET (signal_handler_threads, signum, thread);
 }
 
@@ -283,10 +282,8 @@ SCM_DEFINE (scm_sigaction_for_thread, "sigaction", 1, 3, 0,
 	    "a scheme procedure has been specified, that procedure will run\n"
 	    "in the given @var{thread}.   When no thread has been given, the\n"
 	    "thread that made this call to @code{sigaction} is used.\n"
-	    "Flags can "
-	    "optionally be specified for the new handler (@code{SA_RESTART} will\n"
-	    "always be added if it's available and the system is using restartable\n"
-	    "system calls.)  The return value is a pair with information about the\n"
+	    "Flags can optionally be specified for the new handler.\n"
+	    "The return value is a pair with information about the\n"
 	    "old handler as described above.\n\n"
 	    "This interface does not provide access to the \"signal blocking\"\n"
 	    "facility.  Maybe this is not needed, since the thread support may\n"
@@ -306,18 +303,12 @@ SCM_DEFINE (scm_sigaction_for_thread, "sigaction", 1, 3, 0,
   int save_handler = 0;
       
   SCM old_handler;
+  SCM async;
 
   csig = scm_to_signed_integer (signum, 0, NSIG-1);
 
 #if defined(HAVE_SIGACTION)
-#if defined(SA_RESTART) && defined(HAVE_RESTARTABLE_SYSCALLS)
-  /* don't allow SA_RESTART to be omitted if HAVE_RESTARTABLE_SYSCALLS
-     is defined, since libguile would be likely to produce spurious
-     EINTR errors.  */
-  action.sa_flags = SA_RESTART;
-#else
   action.sa_flags = 0;
-#endif
   if (!SCM_UNBNDP (flags))
     action.sa_flags |= scm_to_int (flags);
   sigemptyset (&action.sa_mask);
@@ -331,6 +322,10 @@ SCM_DEFINE (scm_sigaction_for_thread, "sigaction", 1, 3, 0,
       if (scm_c_thread_exited_p (thread))
 	SCM_MISC_ERROR ("thread has already exited", SCM_EOL);
     }
+
+  /* Allocate upfront, as we can't do it inside the critical
+     section. */
+  async = handler_to_async (handler, csig);
 
   ensure_signal_delivery_thread ();
 
@@ -349,10 +344,13 @@ SCM_DEFINE (scm_sigaction_for_thread, "sigaction", 1, 3, 0,
 #else
 	  chandler = (SIGRETTYPE (*) (int)) handler_int;
 #endif
-	  install_handler (csig, SCM_BOOL_F, SCM_BOOL_F);
+	  install_handler (csig, SCM_BOOL_F, SCM_BOOL_F, async);
 	}
       else
-	SCM_OUT_OF_RANGE (2, handler);
+	{
+	  SCM_CRITICAL_SECTION_END;
+	  SCM_OUT_OF_RANGE (2, handler);
+	}
     }
   else if (scm_is_false (handler))
     {
@@ -364,7 +362,7 @@ SCM_DEFINE (scm_sigaction_for_thread, "sigaction", 1, 3, 0,
 	{
 	  action = orig_handlers[csig];
 	  orig_handlers[csig].sa_handler = SIG_ERR;
-	  install_handler (csig, SCM_BOOL_F, SCM_BOOL_F);
+	  install_handler (csig, SCM_BOOL_F, SCM_BOOL_F, async);
 	}
 #else
       if (orig_handlers[csig] == SIG_ERR)
@@ -373,7 +371,7 @@ SCM_DEFINE (scm_sigaction_for_thread, "sigaction", 1, 3, 0,
 	{
 	  chandler = orig_handlers[csig];
 	  orig_handlers[csig] = SIG_ERR;
-	  install_handler (csig, SCM_BOOL_F, SCM_BOOL_F);
+	  install_handler (csig, SCM_BOOL_F, SCM_BOOL_F, async);
 	}
 #endif
     }
@@ -389,7 +387,7 @@ SCM_DEFINE (scm_sigaction_for_thread, "sigaction", 1, 3, 0,
       if (orig_handlers[csig] == SIG_ERR)
 	save_handler = 1;
 #endif
-      install_handler (csig, thread, handler);
+      install_handler (csig, thread, handler, async);
     }
 
   /* XXX - Silently ignore setting handlers for `program error signals'
@@ -672,29 +670,6 @@ scm_init_scmsigs ()
 
 #else
       orig_handlers[i] = SIG_ERR;
-#endif
-
-#ifdef HAVE_RESTARTABLE_SYSCALLS
-      /* If HAVE_RESTARTABLE_SYSCALLS is defined, it's important that
-	 signals really are restartable.  don't rely on the same
-	 run-time that configure got: reset the default for every signal.
-      */
-#ifdef HAVE_SIGINTERRUPT
-      siginterrupt (i, 0);
-#elif defined(SA_RESTART)
-      {
-	struct sigaction action;
-
-	sigaction (i, NULL, &action);
-	if (!(action.sa_flags & SA_RESTART))
-	  {
-	    action.sa_flags |= SA_RESTART;
-	    sigaction (i, &action, NULL);
-	  }
-      }
-#endif
-      /* if neither siginterrupt nor SA_RESTART are available we may
-	 as well assume that signals are always restartable.  */
 #endif
     }
 

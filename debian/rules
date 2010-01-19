@@ -25,7 +25,7 @@ export DH_OPTIONS
 
 deb_src_maj_ver := 1
 deb_src_min_ver := 8
-deb_src_mic_ver := 5
+deb_src_mic_ver := 7
 deb_src_rev := 1
 
 upstream_ver := $(deb_src_maj_ver).$(deb_src_min_ver).$(deb_src_mic_ver)
@@ -68,6 +68,10 @@ DEB_BUILD_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 ifeq (alpha,$(shell dpkg-architecture -qDEB_HOST_ARCH))
   # The -O2 option breaks make check on alpha right now.
   deb_cflags := -Os -g
+else ifeq (sh4,$(shell dpkg-architecture -qDEB_HOST_ARCH))
+  # Renesas SH(sh4) needs -mieee.  Without it, test-conversion fails.
+  # (Bug: 531378)
+  deb_cflags := -O2 -g -mieee
 else
   deb_cflags := -O2 -g
 endif
@@ -273,6 +277,7 @@ update-debhelper-files:
 	$(call deb_sub,guile-doc.info,$(deb_pkg_basename)-doc.info)
 	$(call deb_sub,guile-doc.install,$(deb_pkg_basename)-doc.install)
         # guile-libs
+	$(call deb_sub,guile-libs.README,$(deb_pkg_basename)-libs.README.Debian)
 	$(call deb_sub,guile-libs.install,$(deb_pkg_basename)-libs.install)
 	$(call deb_sub,guile-libs.lintian,$(deb_pkg_basename)-libs.lintian)
 #        # guile-slib
@@ -288,6 +293,7 @@ deb_trash += debian/$(deb_pkg_basename)-dev.install
 deb_trash += debian/$(deb_pkg_basename)-dev.lintian
 deb_trash += debian/$(deb_pkg_basename)-doc.info
 deb_trash += debian/$(deb_pkg_basename)-doc.install
+deb_trash += debian/$(deb_pkg_basename)-libs.README.Debian
 deb_trash += debian/$(deb_pkg_basename)-libs.install
 deb_trash += debian/$(deb_pkg_basename)-libs.lintian
 #deb_trash += debian/$(deb_pkg_basename)-slib.postinst
@@ -333,6 +339,7 @@ install: build
 
         # Ignore gds files for the moment.
 	dh_install --fail-missing \
+	  -Xusr/share/info/dir \
 	  -Xusr/share/info/r5rs.info \
 	  -Xusr/share/emacs/site-lisp/gds-server.el \
 	  -Xusr/share/emacs/site-lisp/gds.el \

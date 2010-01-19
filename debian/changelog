@@ -1,11 +1,57 @@
-guile-1.8 (1.8.5+1-4.1) unstable; urgency=low
+guile-1.8 (1.8.7+1-3) unstable; urgency=low
 
-  * Non-maintainer upload.
-  * Add dont-redefine-jmp_buf.diff: adds 'scm_' prefix to jmp_buf
-    replacements so they don't affect clients with their own uses for
-    jmp_buf.  (closes: #506684)
+  * Change debian/control sections to lisp to match Debian distribution
+    overrides.
 
- -- Ben Hutchings <ben@decadent.org.uk>  Mon, 08 Dec 2008 04:15:25 +0000
+  * Fix problem with make check and newer libltdl
+    (fix-make-check-for-new-libltdl.diff).  Thanks to Lucas Nussbaum
+    <lucas@lucas-nussbaum.net> for the report. (closes: #560653)
+
+ -- Rob Browning <rlb@defaultvalue.org>  Mon, 18 Jan 2010 22:32:29 -0800
+
+guile-1.8 (1.8.7+1-2) unstable; urgency=low
+
+  * Add -Xusr/share/info/dir to dh_install and depend on "dpkg (>= 1.15.4)
+    | install-info".  Thanks to Jordi Mallach <jordi@debian.org> for an
+    interim NMU (1.8.7+1-1.1).
+
+  * Add debhelper ${misc:Depends} to debian/control for all binary
+    packages.  Thanks to Jordi Mallach <jordi@debian.org> for an interim
+    NMU (1.8.7+1-1.1).
+
+  * Install ./examples to /usr/share/doc/guile-1.8-dev/examples.  Thanks
+    to Mario Lang <mlang@debian.org> for the suggestion. (closes: 539317).
+
+  * Add /usr/share/doc/guile-1.8-libs/README.Debian to discuss the
+    --with-threads issue.  Thanks to rjs@cs.hut.fi (Riku Saikkonen) for
+    the suggestion. (closes: 530010)
+
+  * Change dependency from libreadline5-dev to libreadline6-dev.  Thanks
+    to Trafire Arcanegrin <trafirea@gmail.com> for the report and Jordi
+    Mallach <jordi@debian.org> for an interim NMU (1.8.7+1-1.1).
+    (closes: #550131)
+
+ -- Rob Browning <rlb@defaultvalue.org>  Sun, 25 Oct 2009 19:54:08 -0700
+
+guile-1.8 (1.8.7+1-1) unstable; urgency=low
+
+  * Incorporate new upstream stable release.
+
+  * Do not redefine jmp_buf in a public header, rather define
+    scm_jump_buf, etc.  Thanks to lamont@debian.org and Kurt Roeckx
+    <kurt@roeckx.be>, and to Ben Hutchings <ben@decadent.org.uk> for the
+    patch. (closes: 527527, 506684)
+
+  * Add support for Renesas SuperH architecture.  Thanks to Nobuhiro
+    Iwamatsu <iwamatsu@nigauri.org>. (closes: 531378)
+
+ -- Rob Browning <rlb@defaultvalue.org>  Mon, 06 Jul 2009 23:12:42 -0700
+
+guile-1.8 (1.8.6+1-1) unstable; urgency=low
+
+  * Incorporate new upstream stable release. (closes: #522717, #396975)
+
+ -- Rob Browning <rlb@defaultvalue.org>  Sun, 12 Apr 2009 19:56:55 -0700
 
 guile-1.8 (1.8.5+1-4) unstable; urgency=medium
 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## Copyright 2003, 2004, 2005, 2006, 2007, 2008 Software Foundation, Inc.
+## Copyright 2003, 2004, 2005, 2006, 2007, 2008, 2009 Software Foundation, Inc.
 ##
 ## This file is part of GUILE.
 ##
@@ -30,15 +30,17 @@ EXTRA_DIST =
 
 TESTS_ENVIRONMENT = "${top_builddir}/pre-inst-guile-env"
 
-test_cflags = \
-  -I$(top_srcdir)/test-suite/standalone \
-  -I$(top_srcdir) \
+test_cflags =					\
+  -I$(top_srcdir)/test-suite/standalone		\
+  -I$(top_srcdir) -I$(top_builddir)		\
   $(EXTRA_DEFS) $(GUILE_CFLAGS)
 
 AM_LDFLAGS = $(GUILE_CFLAGS)
 
-snarfcppopts = \
-  $(DEFS) $(DEFAULT_INCLUDES) $(CPPFLAGS) $(CFLAGS) -I$(top_srcdir)
+snarfcppopts =						\
+  $(DEFS) $(DEFAULT_INCLUDES) $(CPPFLAGS) $(CFLAGS)	\
+  -I$(top_srcdir) -I$(top_builddir)
+
 SUFFIXES = .x
 .c.x:
 	${top_builddir}/libguile/guile-snarf -o $@ $< $(snarfcppopts)
@@ -107,9 +109,28 @@ test_conversion_LDADD = ${top_builddir}/libguile/libguile.la
 check_PROGRAMS += test-conversion
 TESTS += test-conversion
 
+# test-fast-slot-ref
+check_SCRIPTS += test-fast-slot-ref
+TESTS += test-fast-slot-ref
+
 # test-use-srfi
 check_SCRIPTS += test-use-srfi
 TESTS += test-use-srfi
+
+# test-scm-c-read
+test_scm_c_read_SOURCES = test-scm-c-read.c
+test_scm_c_read_CFLAGS = ${test_cflags}
+test_scm_c_read_LDADD = ${top_builddir}/libguile/libguile.la
+check_PROGRAMS += test-scm-c-read
+TESTS += test-scm-c-read
+
+# test-scm-take-locale-symbol
+test_scm_take_locale_symbol_SOURCES = test-scm-take-locale-symbol.c
+test_scm_take_locale_symbol_CFLAGS = ${test_cflags}
+test_scm_take_locale_symbol_LDADD = ${top_builddir}/libguile/libguile.la
+check_PROGRAMS += test-scm-take-locale-symbol
+TESTS += test-scm-take-locale-symbol
+
 
 if BUILD_PTHREAD_SUPPORT
 
@@ -119,9 +140,14 @@ test_with_guile_module_LDADD = ${top_builddir}/libguile/libguile.la
 check_PROGRAMS += test-with-guile-module
 TESTS += test-with-guile-module
 
+test_scm_with_guile_CFLAGS = ${test_cflags}
+test_scm_with_guile_LDADD = ${top_builddir}/libguile/libguile.la
+check_PROGRAMS += test-scm-with-guile
+TESTS += test-scm-with-guile
+
 else
 
-EXTRA_DIST += test-with-guile-module.c
+EXTRA_DIST += test-with-guile-module.c test-scm-with-guile.c
 
 endif
 

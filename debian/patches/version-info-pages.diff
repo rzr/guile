@@ -1,7 +1,7 @@
 Index: sid/doc/tutorial/Makefile.am
 ===================================================================
---- sid.orig/doc/tutorial/Makefile.am	2006-10-08 19:50:49.000000000 -0700
-+++ sid/doc/tutorial/Makefile.am	2006-10-08 19:50:59.000000000 -0700
+--- sid.orig/doc/tutorial/Makefile.am
++++ sid/doc/tutorial/Makefile.am
 @@ -21,6 +21,6 @@
  
  AUTOMAKE_OPTIONS = gnu
@@ -9,11 +9,11 @@ Index: sid/doc/tutorial/Makefile.am
 -info_TEXINFOS = guile-tut.texi
 +info_TEXINFOS = guile-tut-1.8.texi
  
- TEXINFO_TEX = ../ref/texinfo.tex
+ EXTRA_DIST = ChangeLog-2008
 Index: sid/doc/tutorial/guile-tut.texi
 ===================================================================
---- sid.orig/doc/tutorial/guile-tut.texi	2006-10-08 19:50:49.000000000 -0700
-+++ sid/doc/tutorial/guile-tut.texi	2006-10-08 19:59:08.000000000 -0700
+--- sid.orig/doc/tutorial/guile-tut.texi
++++ sid/doc/tutorial/guile-tut.texi
 @@ -1,6 +1,6 @@
  \input texinfo @c -*-texinfo-*-
  @c %**start of header

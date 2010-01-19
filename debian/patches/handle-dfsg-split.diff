@@ -2,7 +2,7 @@ Index: sid/configure.in
 ===================================================================
 --- sid.orig/configure.in
 +++ sid/configure.in
-@@ -1451,9 +1451,7 @@
+@@ -1521,9 +1521,7 @@
    am/Makefile
    benchmark-suite/Makefile
    doc/Makefile
@@ -16,18 +16,17 @@ Index: sid/doc/Makefile.am
 ===================================================================
 --- sid.orig/doc/Makefile.am
 +++ sid/doc/Makefile.am
-@@ -21,22 +21,15 @@
+@@ -21,21 +21,14 @@
  
  AUTOMAKE_OPTIONS = gnu
  
 -SUBDIRS = ref tutorial goops r5rs
 +SUBDIRS = tutorial r5rs
  
- # pending the papers from Robert Merkel
- # man_MANS = guile.1
+ dist_man1_MANS = guile.1
  
 -EXAMPLE_SMOB_FILES = \
--    ChangeLog Makefile README image-type.c image-type.h myguile.c
+-    ChangeLog-2008 Makefile README image-type.c image-type.h myguile.c
 -
  OLDFMT = oldfmt.c
  
@@ -38,5 +37,5 @@ Index: sid/doc/Makefile.am
 -	  cp $(srcdir)/example-smob/$$f $(distdir)/example-smob/; \
 -        done
  
- EXTRA_DIST = groupings.alist # guile-api.alist
+ EXTRA_DIST = groupings.alist ChangeLog-2008 # guile-api.alist
  

@@ -1,4 +1,4 @@
-/* Copyright (C) 1995,1996,1997,1998,1999,2000,2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+/* Copyright (C) 1995,1996,1997,1998,1999,2000,2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,13 +17,11 @@
 
 
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
-/* Make GNU/Linux libc declare everything it has. */
-#define _GNU_SOURCE
-
+#include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 
@@ -272,7 +270,7 @@ SCM_DEFINE (scm_getgroups, "getgroups", 0, 0, 0,
 
   size = ngroups * sizeof (GETGROUPS_T);
   groups = scm_malloc (size);
-  getgroups (ngroups, groups);
+  ngroups = getgroups (ngroups, groups);
 
   result = scm_c_make_vector (ngroups, SCM_BOOL_F);
   while (--ngroups >= 0) 
@@ -1338,7 +1336,7 @@ SCM_DEFINE (scm_putenv, "putenv", 1, 0, 0,
       /* We want no "=" in the argument to mean remove the variable from the
 	 environment, but not all putenv()s understand this, for example
 	 FreeBSD 4.8 doesn't.  Getting it happening everywhere is a bit
-	 painful.  What unsetenv() exists, we use that, of course.
+	 painful.  When unsetenv() exists, we use that, of course.
 
          Traditionally putenv("NAME") removes a variable, for example that's
          what we have to do on Solaris 9 (it doesn't have an unsetenv).
@@ -1362,7 +1360,7 @@ SCM_DEFINE (scm_putenv, "putenv", 1, 0, 0,
          build would be to try "NAME" then "NAME=" at runtime, if that's not
          too much like overkill.  */
 
-#if HAVE_UNSETENV
+#if defined HAVE_UNSETENV && HAVE_DECL_UNSETENV
       /* when unsetenv() exists then we use it */
       unsetenv (c_str);
       free (c_str);
@@ -1545,12 +1543,15 @@ SCM_DEFINE (scm_nice, "nice", 1, 0, 0,
 	    "The return value is unspecified.")
 #define FUNC_NAME s_scm_nice
 {
+  int nice_value;
+
   /* nice() returns "prio-NZERO" on success or -1 on error, but -1 can arise
      from "prio-NZERO", so an error must be detected from errno changed */
   errno = 0;
-  nice (scm_to_int (incr));
+  nice_value = nice (scm_to_int (incr));
   if (errno != 0)
     SCM_SYSERROR;
+
   return SCM_UNSPECIFIED;
 }
 #undef FUNC_NAME
@@ -1674,6 +1675,11 @@ SCM_DEFINE (scm_getlogin, "getlogin", 0, 0, 0,
 #endif /* HAVE_GETLOGIN */
 
 #if HAVE_CUSERID
+
+# if !HAVE_DECL_CUSERID
+extern char *cuserid (char *);
+# endif
+
 SCM_DEFINE (scm_cuserid, "cuserid", 0, 0, 0, 
             (void),
 	    "Return a string containing a user name associated with the\n"
@@ -1850,6 +1856,13 @@ static int flock (int fd, int operation)
 #endif /* __MINGW32__ */
 
 #if HAVE_FLOCK || defined (__MINGW32__)
+
+#ifndef __MINGW32__
+# if !HAVE_DECL_FLOCK
+extern int flock (int, int);
+# endif
+#endif
+
 SCM_DEFINE (scm_flock, "flock", 2, 0, 0, 
             (SCM file, SCM operation),
 	    "Apply or remove an advisory lock on an open file.\n"

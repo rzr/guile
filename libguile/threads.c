@@ -1,4 +1,4 @@
-/* Copyright (C) 1995,1996,1997,1998,2000,2001, 2002, 2003, 2004, 2005, 2006 Free Software Foundation, Inc.
+/* Copyright (C) 1995,1996,1997,1998,2000,2001, 2002, 2003, 2004, 2005, 2006, 2008 Free Software Foundation, Inc.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,8 +17,9 @@
 
 
 
-
-#define _GNU_SOURCE
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include "libguile/_scm.h"
 
@@ -421,16 +422,38 @@ guilify_self_1 (SCM_STACKITEM *base)
   t->active_asyncs = SCM_EOL;
   t->block_asyncs = 1;
   t->pending_asyncs = 1;
+  t->critical_section_level = 0;
   t->last_debug_frame = NULL;
   t->base = base;
+#ifdef __ia64__
+  /* Calculate and store off the base of this thread's register
+     backing store (RBS).  Unfortunately our implementation(s) of
+     scm_ia64_register_backing_store_base are only reliable for the
+     main thread.  For other threads, therefore, find out the current
+     top of the RBS, and use that as a maximum. */
+  t->register_backing_store_base = scm_ia64_register_backing_store_base ();
+  {
+    ucontext_t ctx;
+    void *bsp;
+    getcontext (&ctx);
+    bsp = scm_ia64_ar_bsp (&ctx);
+    if (t->register_backing_store_base > bsp)
+      t->register_backing_store_base = bsp;
+  }
+#endif
   t->continuation_root = SCM_EOL;
   t->continuation_base = base;
   scm_i_pthread_cond_init (&t->sleep_cond, NULL);
   t->sleep_mutex = NULL;
   t->sleep_object = SCM_BOOL_F;
   t->sleep_fd = -1;
-  /* XXX - check for errors. */
-  pipe (t->sleep_pipe);
+
+  if (pipe (t->sleep_pipe) != 0)
+    /* FIXME: Error conditions during the initialization phase are handled
+       gracelessly since public functions such as `scm_init_guile ()'
+       currently have type `void'.  */
+    abort ();
+
   scm_i_pthread_mutex_init (&t->heap_mutex, NULL);
   t->clear_freelists_p = 0;
   t->gc_running_p = 0;
@@ -443,13 +466,19 @@ guilify_self_1 (SCM_STACKITEM *base)
 
   scm_i_pthread_setspecific (scm_i_thread_key, t);
 
-  scm_i_pthread_mutex_lock (&t->heap_mutex);
-
+  /* As soon as this thread adds itself to the global thread list, the
+     GC may think that it has a stack that needs marking.  Therefore
+     initialize t->top to be the same as t->base, just in case GC runs
+     before the thread can lock its heap_mutex for the first time. */
+  t->top = t->base;
   scm_i_pthread_mutex_lock (&thread_admin_mutex);
   t->next_thread = all_threads;
   all_threads = t;
   thread_count++;
   scm_i_pthread_mutex_unlock (&thread_admin_mutex);
+
+  /* Enter Guile mode. */
+  scm_enter_guile (t);
 }
 
 /* Perform second stage of thread initialisation, in guile mode.
@@ -576,10 +605,19 @@ scm_i_init_thread_for_guile (SCM_STACKITEM *base, SCM parent)
     {
       /* This thread is already guilified but not in guile mode, just
 	 resume it.
-	 
-	 XXX - base might be lower than when this thread was first
-	 guilified.
-       */
+
+         A user call to scm_with_guile() will lead us to here.  This could
+         happen from anywhere on the stack, and in particular lower on the
+         stack than when it was when this thread was first guilified.  Thus,
+         `base' must be updated.  */
+#if SCM_STACK_GROWS_UP
+      if (base < t->base)
+         t->base = base;
+#else
+      if (base > t->base)
+         t->base = base;
+#endif
+
       scm_enter_guile ((scm_t_guile_ticket) t);
       return 1;
     }
@@ -896,17 +934,14 @@ SCM_DEFINE (scm_join_thread, "join-thread", 1, 0, 0,
   scm_i_scm_pthread_mutex_lock (&thread_admin_mutex);
 
   t = SCM_I_THREAD_DATA (thread);
-  if (!t->exited)
+  while (!t->exited)
     {
-      while (1)
-	{
-	  block_self (t->join_queue, thread, &thread_admin_mutex, NULL);
-	  if (t->exited)
-	    break;
-	  scm_i_pthread_mutex_unlock (&thread_admin_mutex);
-	  SCM_TICK;
-	  scm_i_scm_pthread_mutex_lock (&thread_admin_mutex);
-	}
+      block_self (t->join_queue, thread, &thread_admin_mutex, NULL);
+      if (t->exited)
+	break;
+      scm_i_pthread_mutex_unlock (&thread_admin_mutex);
+      SCM_TICK;
+      scm_i_scm_pthread_mutex_lock (&thread_admin_mutex);
     }
   res = t->result;
 
@@ -1016,9 +1051,9 @@ fat_mutex_lock (SCM mutex)
     {
       while (1)
 	{
-	  block_self (m->waiting, mutex, &m->lock, NULL);
 	  if (scm_is_eq (m->owner, thread))
 	    break;
+	  block_self (m->waiting, mutex, &m->lock, NULL);
 	  scm_i_pthread_mutex_unlock (&m->lock);
 	  SCM_TICK;
 	  scm_i_scm_pthread_mutex_lock (&m->lock);
@@ -1350,7 +1385,7 @@ SCM_DEFINE (scm_broadcast_condition_variable, "broadcast-condition-variable", 1,
     scm_mark_locations ((SCM_STACKITEM *) &ctx.uc_mcontext,           \
       ((size_t) (sizeof (SCM_STACKITEM) - 1 + sizeof ctx.uc_mcontext) \
        / sizeof (SCM_STACKITEM)));                                    \
-    bot = (SCM_STACKITEM *) scm_ia64_register_backing_store_base ();  \
+    bot = (SCM_STACKITEM *) SCM_I_CURRENT_THREAD->register_backing_store_base;  \
     top = (SCM_STACKITEM *) scm_ia64_ar_bsp (&ctx);                   \
     scm_mark_locations (bot, top - bot); } while (0)
 #else
@@ -1374,7 +1409,7 @@ scm_threads_mark_stacks (void)
 #else
       scm_mark_locations (t->top, t->base - t->top);
 #endif
-      scm_mark_locations ((SCM_STACKITEM *) t->regs,
+      scm_mark_locations ((void *) &t->regs,
 			  ((size_t) sizeof(t->regs)
 			   / sizeof (SCM_STACKITEM)));
     }
@@ -1420,7 +1455,10 @@ scm_std_select (int nfds,
   if (res > 0 && FD_ISSET (wakeup_fd, readfds))
     {
       char dummy;
-      read (wakeup_fd, &dummy, 1);
+      size_t count;
+
+      count = read (wakeup_fd, &dummy, 1);
+
       FD_CLR (wakeup_fd, readfds);
       res -= 1;
       if (res == 0)
@@ -1627,7 +1665,6 @@ scm_i_thread_sleep_for_gc ()
 /* This mutex is used by SCM_CRITICAL_SECTION_START/END.
  */
 scm_i_pthread_mutex_t scm_i_critical_section_mutex;
-int scm_i_critical_section_level = 0;
 
 static SCM dynwind_critical_section_mutex;
 
@@ -1643,6 +1680,10 @@ scm_dynwind_critical_section (SCM mutex)
 /*** Initialization */
 
 scm_i_pthread_key_t scm_i_freelist, scm_i_freelist2;
+#ifdef __MINGW32__
+scm_i_pthread_key_t *scm_i_freelist_ptr = &scm_i_freelist;
+scm_i_pthread_key_t *scm_i_freelist2_ptr = &scm_i_freelist2;
+#endif
 scm_i_pthread_mutex_t scm_i_misc_mutex;
 
 #if SCM_USE_PTHREAD_THREADS

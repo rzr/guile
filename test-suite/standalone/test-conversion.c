@@ -1,4 +1,4 @@
-/* Copyright (C) 1999,2000,2001,2003,2004, 2006, 2007, 2008 Free Software Foundation, Inc.
+/* Copyright (C) 1999,2000,2001,2003,2004, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,9 @@
 
 #ifdef HAVE_INTTYPES_H
 # include <inttypes.h>
-#elif (!defined PRIiMAX)
+#endif
+
+#ifndef PRIiMAX
 # if (defined SIZEOF_LONG_LONG) && (SIZEOF_LONG_LONG >= 8)
 #  define PRIiMAX "lli"
 #  define PRIuMAX "llu"
@@ -678,31 +680,31 @@ test_8u (const char *str, scm_t_uintmax (*func) (SCM), const char *func_name,
 #define DEFSTST(f) static scm_t_intmax  tst_##f (SCM x) { return f(x); }
 #define DEFUTST(f) static scm_t_uintmax tst_##f (SCM x) { return f(x); }
 
-DEFSTST (scm_to_schar);
-DEFUTST (scm_to_uchar);
-DEFSTST (scm_to_char);
-DEFSTST (scm_to_short);
-DEFUTST (scm_to_ushort);
-DEFSTST (scm_to_int);
-DEFUTST (scm_to_uint);
-DEFSTST (scm_to_long);
-DEFUTST (scm_to_ulong);
+DEFSTST (scm_to_schar)
+DEFUTST (scm_to_uchar)
+DEFSTST (scm_to_char)
+DEFSTST (scm_to_short)
+DEFUTST (scm_to_ushort)
+DEFSTST (scm_to_int)
+DEFUTST (scm_to_uint)
+DEFSTST (scm_to_long)
+DEFUTST (scm_to_ulong)
 #if SCM_SIZEOF_LONG_LONG != 0
-DEFSTST (scm_to_long_long);
-DEFUTST (scm_to_ulong_long);
+DEFSTST (scm_to_long_long)
+DEFUTST (scm_to_ulong_long)
 #endif
-DEFSTST (scm_to_ssize_t);
-DEFUTST (scm_to_size_t);
+DEFSTST (scm_to_ssize_t)
+DEFUTST (scm_to_size_t)
 
-DEFSTST (scm_to_int8);
-DEFUTST (scm_to_uint8);
-DEFSTST (scm_to_int16);
-DEFUTST (scm_to_uint16);
-DEFSTST (scm_to_int32);
-DEFUTST (scm_to_uint32);
+DEFSTST (scm_to_int8)
+DEFUTST (scm_to_uint8)
+DEFSTST (scm_to_int16)
+DEFUTST (scm_to_uint16)
+DEFSTST (scm_to_int32)
+DEFUTST (scm_to_uint32)
 #ifdef SCM_HAVE_T_INT64
-DEFSTST (scm_to_int64);
-DEFUTST (scm_to_uint64);
+DEFSTST (scm_to_int64)
+DEFUTST (scm_to_uint64)
 #endif
 
 #define TEST_8S(v,f,r,re,te) test_8s (v, tst_##f, #f, r, re, te)
@@ -816,15 +818,60 @@ test_9 (double val, const char *result)
     }
 }
 
+/* The `infinity' and `not-a-number' values.  */
+static double guile_Inf, guile_NaN;
+
+/* Initialize GUILE_INF and GUILE_NAN.  Taken from `guile_ieee_init ()' in
+   `libguile/numbers.c'.  */
+static void
+ieee_init (void)
+{
+#ifdef INFINITY
+  /* C99 INFINITY, when available.
+     FIXME: The standard allows for INFINITY to be something that overflows
+     at compile time.  We ought to have a configure test to check for that
+     before trying to use it.  (But in practice we believe this is not a
+     problem on any system guile is likely to target.)  */
+  guile_Inf = INFINITY;
+#elif HAVE_DINFINITY
+  /* OSF */
+  extern unsigned int DINFINITY[2];
+  guile_Inf = (*((double *) (DINFINITY)));
+#else
+  double tmp = 1e+10;
+  guile_Inf = tmp;
+  for (;;)
+    {
+      guile_Inf *= 1e+10;
+      if (guile_Inf == tmp)
+	break;
+      tmp = guile_Inf;
+    }
+#endif
+
+#ifdef NAN
+  /* C99 NAN, when available */
+  guile_NaN = NAN;
+#elif HAVE_DQNAN
+  {
+    /* OSF */
+    extern unsigned int DQNAN[2];
+    guile_NaN = (*((double *)(DQNAN)));
+  }
+#else
+  guile_NaN = guile_Inf / guile_Inf;
+#endif
+}
+
 static void
 test_from_double ()
 {
   test_9 (12, "12.0");
   test_9 (0.25, "0.25");
   test_9 (0.1, "0.1");
-  test_9 (1.0/0.0, "+inf.0");
-  test_9 (-1.0/0.0, "-inf.0");
-  test_9 (0.0/0.0, "+nan.0");
+  test_9 (guile_Inf, "+inf.0");
+  test_9 (-guile_Inf, "-inf.0");
+  test_9 (guile_NaN, "+nan.0");
 }
 
 typedef struct {
@@ -878,8 +925,8 @@ test_to_double ()
   test_10 ("12",         12.0,  0);
   test_10 ("0.25",       0.25,  0);
   test_10 ("1/4",        0.25,  0);
-  test_10 ("+inf.0",  1.0/0.0,  0);
-  test_10 ("-inf.0", -1.0/0.0,  0);
+  test_10 ("+inf.0", guile_Inf, 0);
+  test_10 ("-inf.0",-guile_Inf, 0);
   test_10 ("+1i",         0.0,  1);
 }
 
@@ -1054,6 +1101,7 @@ tests (void *data, int argc, char **argv)
 int
 main (int argc, char *argv[])
 {
+  ieee_init ();
   scm_boot_guile (argc, argv, tests, NULL);
   return 0;
 }

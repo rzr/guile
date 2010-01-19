@@ -1,8 +1,94 @@
 Guile NEWS --- history of user-visible changes.
-Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 See the end for copying conditions.
 
 Please send Guile bug reports to bug-guile@gnu.org.
+
+
+Changes in 1.8.7 (since 1.8.6)
+
+* Bugs fixed
+
+** Fix compilation with `--disable-deprecated'
+** Fix %fast-slot-ref/set!, to avoid possible segmentation fault
+** Fix MinGW build problem caused by HAVE_STRUCT_TIMESPEC confusion
+** Fix build problem when scm_t_timespec is different from struct timespec
+** Fix build when compiled with -Wundef -Werror
+** More build fixes for `alphaev56-dec-osf5.1b' (Tru64)
+** Build fixes for `powerpc-ibm-aix5.3.0.0' (AIX 5.3)
+** With GCC, always compile with `-mieee' on `alpha*' and `sh*'
+** Better diagnose broken `(strftime "%z" ...)' in `time.test' (bug #24130)
+** Fix parsing of SRFI-88/postfix keywords longer than 128 characters
+** Fix reading of complex numbers where both parts are inexact decimals
+
+** Allow @ macro to work with (ice-9 syncase)
+
+Previously, use of the @ macro in a module whose code is being
+transformed by (ice-9 syncase) would cause an "Invalid syntax" error.
+Now it works as you would expect (giving the value of the specified
+module binding).
+
+** Have `scm_take_locale_symbol ()' return an interned symbol (bug #25865)
+** Fix potential deadlocks when running on multiple threads
+
+** Fix problems building with the i586-mingw32msvc cross-compiler
+
+It's now possible to build Guile for Windows by using the
+i586-mingw32msvc cross-compiler on GNU/Linux.  This kind of build
+produces DLLs and a main program that can be copied to and used on a
+Windows PC.  For how to do this, see the `Cross building Guile'
+section in `README'.
+
+
+Changes in 1.8.6 (since 1.8.5)
+
+* New features (see the manual for details)
+
+** New convenience function `scm_c_symbol_length ()'
+
+** Single stepping through code from Emacs
+
+When you use GDS to evaluate Scheme code from Emacs, you can now use
+`C-u' to indicate that you want to single step through that code. See
+`Evaluating Scheme Code' in the manual for more details.
+
+** New "guile(1)" man page!
+
+* Changes to the distribution
+
+** Automake's `AM_MAINTAINER_MODE' is no longer used
+
+Thus, the `--enable-maintainer-mode' configure option is no longer
+available: Guile is now always configured in "maintainer mode".
+
+** `ChangeLog' files are no longer updated
+
+Instead, changes are detailed in the version control system's logs.  See
+the top-level `ChangeLog' files for details.
+
+
+* Bugs fixed
+
+** `symbol->string' now returns a read-only string, as per R5RS
+** Fix incorrect handling of the FLAGS argument of `fold-matches'
+** `guile-config link' now prints `-L$libdir' before `-lguile'
+** Fix memory corruption involving GOOPS' `class-redefinition'
+** Fix possible deadlock in `mutex-lock'
+** Fix build issue on Tru64 and ia64-hp-hpux11.23 (`SCM_UNPACK' macro)
+** Fix build issue on mips, mipsel, powerpc and ia64 (stack direction)
+** Fix build issue on hppa2.0w-hp-hpux11.11 (`dirent64' and `readdir64_r')
+** Fix build issue on i386-unknown-freebsd7.0 ("break strict-aliasing rules")
+** Fix misleading output from `(help rationalize)'
+** Fix build failure on Debian hppa architecture (bad stack growth detection)
+** Fix `gcd' when called with a single, negative argument.
+** Fix `Stack overflow' errors seen when building on some platforms
+** Fix bug when `scm_with_guile ()' was called several times from the
+   same thread
+** The handler of SRFI-34 `with-exception-handler' is now invoked in the
+   dynamic environment of the call to `raise'
+** Fix potential deadlock in `make-struct'
+** Fix compilation problem with libltdl from Libtool 2.2.x
+** Fix sloppy bound checking in `string-{ref,set!}' with the empty string
 
 
 Changes in 1.8.5 (since 1.8.4)
@@ -70,13 +156,6 @@ lead to a stack overflow.
 ** Removed use of non-portable makefile constructs
 ** Fixed shadowing of libc's <random.h> on Tru64, which broke compilation
 ** Make sure all tests honor `$TMPDIR'
-
-* Changes to the distribution
-
-** New FAQ
-
-We've started collecting Frequently Asked Questions (FAQ), and will
-distribute these (with answers!) in future Guile releases.
 
 
 Changes in 1.8.4 (since 1.8.3)

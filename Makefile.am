@@ -31,11 +31,12 @@ bin_SCRIPTS = guile-tools
 
 include_HEADERS = libguile.h
 
-EXTRA_DIST = LICENSE HACKING GUILE-VERSION FAQ guile-1.8.pc.in
+EXTRA_DIST = LICENSE HACKING GUILE-VERSION guile-1.8.pc.in	\
+	     ChangeLog-2008 m4/autobuild.m4
 
 TESTS = check-guile
 
-ACLOCAL_AMFLAGS = -I guile-config
+ACLOCAL_AMFLAGS = -I m4
 
 DISTCLEANFILES = check-guile.log
 
