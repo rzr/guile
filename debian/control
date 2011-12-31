@@ -1,8 +1,11 @@
 Source: guile-1.8
 Section: interpreters
 Priority: optional
-Maintainer: Rob Browning <rlb@defaultvalue.org>
-Build-Depends: libtool, debhelper (>= 5), quilt, libncurses5-dev, libreadline6-dev, libltdl3-dev, libgmp3-dev, texinfo
+Maintainer: Philippe Coval <rzr@gna.org>
+X-Original-Maintainer: Rob Browning <rlb@defaultvalue.org>
+Build-Depends: libtool, debhelper (>= 5), quilt, libncurses5-dev
+ , libreadline6-dev | libreadline5-dev
+ , libltdl3-dev, libgmp3-dev, texinfo
 Build-Conflicts: ash (<= 0.3.8-31)
 Standards-Version: 3.7.2
 
