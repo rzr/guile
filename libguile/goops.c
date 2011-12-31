@@ -24,7 +24,12 @@
  * Erick Gallesio <eg@unice.fr>.
  */
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
+
 #include <stdio.h>
+#include <assert.h>
 
 #include "libguile/_scm.h"
 #include "libguile/alist.h"
@@ -1213,7 +1218,10 @@ SCM_DEFINE (scm_sys_fast_slot_ref, "%fast-slot-ref", 2, 0, 0,
   unsigned long int i;
 
   SCM_VALIDATE_INSTANCE (1, obj);
-  i = scm_to_unsigned_integer (index, 0, SCM_NUMBER_OF_SLOTS(obj)-1);
+  i = scm_to_unsigned_integer (index, 0,
+			       SCM_I_INUM (SCM_SLOT (SCM_CLASS_OF (obj),
+						     scm_si_nfields))
+			       - 1);
   return SCM_SLOT (obj, i);
 }
 #undef FUNC_NAME
@@ -1227,7 +1235,10 @@ SCM_DEFINE (scm_sys_fast_slot_set_x, "%fast-slot-set!", 3, 0, 0,
   unsigned long int i;
 
   SCM_VALIDATE_INSTANCE (1, obj);
-  i = scm_to_unsigned_integer (index, 0, SCM_NUMBER_OF_SLOTS(obj)-1);
+  i = scm_to_unsigned_integer (index, 0,
+			       SCM_I_INUM (SCM_SLOT (SCM_CLASS_OF (obj),
+						     scm_si_nfields))
+			       - 1);
 
   SCM_SET_SLOT (obj, i, value);
 
@@ -1705,11 +1716,10 @@ go_to_hell (void *o)
 {
   SCM obj = SCM_PACK ((scm_t_bits) o);
   scm_lock_mutex (hell_mutex);
-  if (n_hell == hell_size)
+  if (n_hell >= hell_size)
     {
-      long new_size = 2 * hell_size;
-      hell = scm_realloc (hell, new_size);
-      hell_size = new_size;
+      hell_size *= 2;
+      hell = scm_realloc (hell, hell_size * sizeof(*hell));
     }
   hell[n_hell++] = SCM_STRUCT_DATA (obj);
   scm_unlock_mutex (hell_mutex);
@@ -2995,7 +3005,7 @@ scm_init_goops_builtins (void)
 
   list_of_no_method = scm_permanent_object (scm_list_1 (sym_no_method));
 
-  hell = scm_malloc (hell_size);
+  hell = scm_calloc (hell_size * sizeof (*hell));
   hell_mutex = scm_permanent_object (scm_make_mutex ());
 
   create_basic_classes ();

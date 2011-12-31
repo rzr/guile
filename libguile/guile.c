@@ -1,4 +1,4 @@
-/* Copyright (C) 1996,1997,2000,2001, 2006 Free Software Foundation, Inc.
+/* Copyright (C) 1996,1997,2000,2001, 2006, 2008 Free Software Foundation, Inc.
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
    based on the list of installed, statically linked libraries on the
    system.  For now, please don't put interesting code in here.  */
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
@@ -40,11 +40,6 @@
 #include <winsock2.h>
 #endif
 
-/* Debugger interface (don't change the order of the following lines) */
-#define GDB_TYPE SCM
-#include <libguile/gdb_interface.h>
-GDB_INTERFACE;
-
 static void
 inner_main (void *closure SCM_UNUSED, int argc, char **argv)
 {
@@ -52,7 +47,6 @@ inner_main (void *closure SCM_UNUSED, int argc, char **argv)
   /* This is necessary to startup the Winsock API under Win32. */
   WSADATA WSAData;
   WSAStartup (0x0202, &WSAData);
-  GDB_INTERFACE_INIT;
 #endif /* __MINGW32__ */
 
   /* module initializations would go here */
@@ -66,11 +60,6 @@ inner_main (void *closure SCM_UNUSED, int argc, char **argv)
 int
 main (int argc, char **argv)
 {
-#if !defined (__MINGW32__)
-  /* libtool automagically inserts this variable into your executable... */
-  extern const lt_dlsymlist lt_preloaded_symbols[];
-  lt_dlpreload_default (lt_preloaded_symbols);
-#endif
   scm_boot_guile (argc, argv, inner_main, 0);
   return 0; /* never reached */
 }

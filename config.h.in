@@ -2,7 +2,7 @@
 
 /*
 
-Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
 This file is part of GUILE
 
@@ -22,6 +22,9 @@ Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA 02110-1301, USA.
 
 */
+
+/* Define if building universal (internal helper macro) */
+#undef AC_APPLE_UNIVERSAL_BUILD
 
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
@@ -131,6 +134,18 @@ Boston, MA 02110-1301, USA.
    */
 #undef HAVE_DCGETTEXT
 
+/* Define to 1 if you have the declaration of `cuserid', and to 0 if you
+   don't. */
+#undef HAVE_DECL_CUSERID
+
+/* Define to 1 if you have the declaration of `flock', and to 0 if you don't.
+   */
+#undef HAVE_DECL_FLOCK
+
+/* Define to 1 if you have the declaration of `hstrerror', and to 0 if you
+   don't. */
+#undef HAVE_DECL_HSTRERROR
+
 /* Define to 1 if you have the declaration of `sethostname', and to 0 if you
    don't. */
 #undef HAVE_DECL_SETHOSTNAME
@@ -146,6 +161,14 @@ Boston, MA 02110-1301, USA.
 /* Define to 1 if you have the declaration of `tzname', and to 0 if you don't.
    */
 #undef HAVE_DECL_TZNAME
+
+/* Define to 1 if you have the declaration of `unsetenv', and to 0 if you
+   don't. */
+#undef HAVE_DECL_UNSETENV
+
+/* Define to 1 if you have the declaration of `vsnprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_VSNPRINTF
 
 /* Define to 1 if you have the `DINFINITY' function. */
 #undef HAVE_DINFINITY
@@ -373,6 +396,9 @@ Boston, MA 02110-1301, USA.
 /* Define to 1 if you have the `lstat' function. */
 #undef HAVE_LSTAT
 
+/* Define to 1 if you have the <machine/fpu.h> header file. */
+#undef HAVE_MACHINE_FPU_H
+
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
@@ -448,6 +474,9 @@ Boston, MA 02110-1301, USA.
 /* Define to 1 if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
 
+/* Define to 1 if you have the `readdir64_r' function. */
+#undef HAVE_READDIR64_R
+
 /* Define to 1 if you have the `readdir_r' function. */
 #undef HAVE_READDIR_R
 
@@ -462,10 +491,6 @@ Boston, MA 02110-1301, USA.
 
 /* Define to 1 if you have the `rename' function. */
 #undef HAVE_RENAME
-
-/* Define to 1 if system calls automatically restart after interruption by a
-   signal. */
-#undef HAVE_RESTARTABLE_SYSCALLS
 
 /* Define to 1 if you have the `rindex' function. */
 #undef HAVE_RINDEX
@@ -741,6 +766,10 @@ Boston, MA 02110-1301, USA.
 /* Define if localtime caches the TZ setting. */
 #undef LOCALTIME_CACHE
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* Define if the operating system supplies sleep without declaring it. */
 #undef MISSING_SLEEP_DECL
 
@@ -862,6 +891,28 @@ Boston, MA 02110-1301, USA.
 /* Define if you need additional CPP macros on Win32 platforms. */
 #undef USE_DLL_IMPORT
 
+/* Enable extensions on AIX 3, Interix.  */
+#ifndef _ALL_SOURCE
+# undef _ALL_SOURCE
+#endif
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
+/* Enable threading extensions on Solaris.  */
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# undef _POSIX_PTHREAD_SEMANTICS
+#endif
+/* Enable extensions on HP NonStop.  */
+#ifndef _TANDEM_SOURCE
+# undef _TANDEM_SOURCE
+#endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# undef __EXTENSIONS__
+#endif
+
+
 /* Define if the system headers declare usleep to return void. */
 #undef USLEEP_RETURNS_VOID
 
@@ -869,15 +920,16 @@ Boston, MA 02110-1301, USA.
    is defined. See GUILE_STRUCT_UTIMBUF in aclocal.m4. */
 #undef UTIMBUF_NEEDS_POSIX
 
-/* Define to 1 if your processor stores words with the most significant byte
-   first (like Motorola and SPARC, unlike Intel and VAX). */
-#undef WORDS_BIGENDIAN
-
-/* Define to 1 if on AIX 3.
-   System headers sometimes define this.
-   We just want to avoid a redefinition error message.  */
-#ifndef _ALL_SOURCE
-# undef _ALL_SOURCE
+/* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
+   significant byte first (like Motorola and SPARC, unlike Intel). */
+#if defined AC_APPLE_UNIVERSAL_BUILD
+# if defined __BIG_ENDIAN__
+#  define WORDS_BIGENDIAN 1
+# endif
+#else
+# ifndef WORDS_BIGENDIAN
+#  undef WORDS_BIGENDIAN
+# endif
 #endif
 
 /* Define to 1 if on MINIX. */

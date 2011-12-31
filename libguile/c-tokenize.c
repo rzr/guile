@@ -8,7 +8,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 34
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -178,14 +178,9 @@ extern FILE *yyin, *yyout;
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
 
-/* The following is because we cannot portably get our hands on size_t
- * (without autoconf's help, which isn't available because we want
- * flex-generated scanners to compile on their own).
- */
-
 #ifndef YY_TYPEDEF_YY_SIZE_T
 #define YY_TYPEDEF_YY_SIZE_T
-typedef unsigned int yy_size_t;
+typedef size_t yy_size_t;
 #endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
@@ -621,7 +616,7 @@ int cookie_was_last = 0;
 #define IS_COOKIE cookie_was_last = 1
 #define IS_NOT_COOKIE cookie_was_last = 0
  
-#line 625 "<stdout>"
+#line 620 "<stdout>"
 
 #define INITIAL 0
 
@@ -638,6 +633,35 @@ int cookie_was_last = 0;
 #endif
 
 static int yy_init_globals (void );
+
+/* Accessor methods to globals.
+   These are made visible to non-reentrant scanners for convenience. */
+
+int yylex_destroy (void );
+
+int yyget_debug (void );
+
+void yyset_debug (int debug_flag  );
+
+YY_EXTRA_TYPE yyget_extra (void );
+
+void yyset_extra (YY_EXTRA_TYPE user_defined  );
+
+FILE *yyget_in (void );
+
+void yyset_in  (FILE * in_str  );
+
+FILE *yyget_out (void );
+
+void yyset_out  (FILE * out_str  );
+
+int yyget_leng (void );
+
+char *yyget_text (void );
+
+int yyget_lineno (void );
+
+void yyset_lineno (int line_number  );
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -775,7 +799,7 @@ YY_DECL
 #line 65 "./c-tokenize.lex"
 
 
-#line 779 "<stdout>"
+#line 803 "<stdout>"
 
 	if ( !(yy_init) )
 		{
@@ -1211,7 +1235,7 @@ YY_RULE_SETUP
 #line 181 "./c-tokenize.lex"
 ECHO;
 	YY_BREAK
-#line 1215 "<stdout>"
+#line 1239 "<stdout>"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

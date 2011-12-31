@@ -17,6 +17,9 @@
 
 
 
+#ifdef HAVE_CONFIG_H
+# include <config.h>
+#endif
 
 #include <stdio.h>
 #include "libguile/_scm.h"
@@ -689,7 +692,7 @@ scm_ithrow (SCM key, SCM args, int noreturn SCM_UNUSED)
   SCM dynpair = SCM_UNDEFINED;
   SCM winds;
 
-  if (scm_i_critical_section_level)
+  if (SCM_I_CURRENT_THREAD->critical_section_level)
     {
       fprintf (stderr, "throw from within critical section.\n");
       abort ();
@@ -824,6 +827,12 @@ scm_ithrow (SCM key, SCM args, int noreturn SCM_UNUSED)
   /* Otherwise, it's some random piece of junk.  */
   else
     abort ();
+
+#ifdef __ia64__
+  /* On IA64, we #define longjmp as setcontext, and GCC appears not to
+     know that that doesn't return. */
+  return SCM_UNSPECIFIED;
+#endif
 }
 
 

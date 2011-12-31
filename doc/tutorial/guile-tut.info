@@ -1,7 +1,8 @@
+This is guile-tut.info, produced by makeinfo version 4.8 from
+guile-tut.texi.
+
 INFO-DIR-SECTION The Algorithmic Language Scheme
 START-INFO-DIR-ENTRY
-This is guile-tut.info, produced by makeinfo version 4.11 from guile-tut.texi.
-
 * Guile Tutorial: (guile-tut).  The Guile tutorial.
 END-INFO-DIR-ENTRY
 
@@ -290,7 +291,7 @@ library (useful for UNIX systems programming), the regular expression
 library _rx_, and many more ...  
 
   So Guile has many more primitive procedures available to it than those
-specified in *note Revised(5) Report on the Algorithmic Language
+specified in *Note Revised(5) Report on the Algorithmic Language
 Scheme: (r5rs)Standard Procedures.  On top of that, Guile will interpret
 almost all standard Scheme programs.  The only incompatible difference
 between the basic Guile language and R5RS Scheme is that Guile is case
@@ -322,7 +323,7 @@ with a slant toward the interesting things that can be done in Guile.
 aspects of Guile, showing you how new types of problems can be solved
 with Guile.  Note that using Guile as a library with `libguile.a' is
 described in its own chapter (*note Guile in a Library::).  Also note
-that some small examples are given in *note Jump Start::.
+that some small examples are given in *Note Jump Start::.
 
   To get started you need to know how to program in "Scheme" (a dialect
 of LISP).  Fortunately Scheme is a small, clean language and is not
@@ -331,7 +332,7 @@ introduce computer programming.
 
   I will not try to teach you Scheme here (although you might end up
 learning by example), since there are many good books on the subject,
-listed in *note Where to find more Guile/Scheme resources::. (1)
+listed in *Note Where to find more Guile/Scheme resources::. (1)
 
 3.0.1 Hello World
 -----------------
@@ -779,7 +780,7 @@ stable, because it is simpler.
   The `scm_' interface is necessary if you want to poke into the
 innards of Scheme data structures, or do anything else that is not
 offered by the `gh_' interface.  It is not covered in this tutorial,
-but is covered extensively in *note Data Representation in Guile:
+but is covered extensively in *Note Data Representation in Guile:
 (guile)Data representation.
 
   This chapter gives a gentle introduction to the `gh_' interface,
@@ -1324,31 +1325,31 @@ This is an alphabetical list of the major data structures in Dominion.
 
 
 Tag Table:
-Node: Top222
-Node: Jump Start1374
-Node: Introduction4985
-Node: What are scripting and extension languages5686
-Node: History of Guile and its motivations9223
-Node: How to characterize Guile11677
-Node: Using Guile to program in Scheme13205
-Ref: Using Guile to program in Scheme-Footnote-126037
-Node: Guile in a Library26135
-Node: Two world views26712
-Node: What is libguile28716
-Node: How to get started with libguile30700
-Node: More interesting programming with libguile33540
-Node: learn1.c34840
-Node: c_builtins.h36294
-Node: c_builtins.c36646
-Node: What learn1 is doing38152
-Node: Compiling and running learn140021
-Node: Further examples41229
-Node: Regular Expression Support41831
-Node: UNIX System Programming42018
-Node: Where to find more Guile/Scheme resources42222
-Node: Concept Index42449
-Node: Procedure and Macro Index51204
-Node: Variable Index51912
-Node: Type Index52146
+Node: Top221
+Node: Jump Start1373
+Node: Introduction4984
+Node: What are scripting and extension languages5685
+Node: History of Guile and its motivations9222
+Node: How to characterize Guile11676
+Node: Using Guile to program in Scheme13204
+Ref: Using Guile to program in Scheme-Footnote-126036
+Node: Guile in a Library26134
+Node: Two world views26711
+Node: What is libguile28715
+Node: How to get started with libguile30699
+Node: More interesting programming with libguile33539
+Node: learn1.c34839
+Node: c_builtins.h36293
+Node: c_builtins.c36645
+Node: What learn1 is doing38151
+Node: Compiling and running learn140020
+Node: Further examples41228
+Node: Regular Expression Support41830
+Node: UNIX System Programming42017
+Node: Where to find more Guile/Scheme resources42221
+Node: Concept Index42448
+Node: Procedure and Macro Index51203
+Node: Variable Index51911
+Node: Type Index52145
 
 End Tag Table

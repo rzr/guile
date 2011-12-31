@@ -26,7 +26,7 @@ DEFS = @DEFS@ @EXTRA_DEFS@
 ## Check for headers in $(srcdir)/.., so that #include
 ## <libguile/MUMBLE.h> will find MUMBLE.h in this dir when we're
 ## building.
-INCLUDES = -I.. -I$(srcdir)/..
+AM_CPPFLAGS = -I.. -I$(srcdir)/..
 
 srfiincludedir = $(pkgincludedir)/srfi
 
@@ -81,14 +81,14 @@ srfi_DATA = srfi-1.scm \
 	    srfi-69.scm \
 	    srfi-88.scm
 
-EXTRA_DIST = $(srfi_DATA) 
+EXTRA_DIST = $(srfi_DATA) ChangeLog-2008
 TAGS_FILES = $(srfi_DATA)
 
 GUILE_SNARF = ../libguile/guile-snarf
 
-MKDEP = gcc -M -MG $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+MKDEP = gcc -M -MG $(DEFS) $(AM_CPPFLAGS) $(CPPFLAGS) $(CFLAGS)
 
-snarfcppopts = $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+snarfcppopts = $(DEFS) $(AM_CPPFLAGS) $(CPPFLAGS) $(CFLAGS)
 
 SUFFIXES = .x
 .c.x:

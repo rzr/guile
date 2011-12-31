@@ -32,7 +32,7 @@ DEFAULT_INCLUDES =
 ## Check for headers in $(srcdir)/.., so that #include
 ## <libguile/MUMBLE.h> will find MUMBLE.h in this dir when we're
 ## building.
-INCLUDES = -I.. -I$(top_srcdir) -I$(top_builddir)
+AM_CPPFLAGS = -I.. -I$(top_srcdir) -I$(top_builddir)
 
 ETAGS_ARGS = --regex='/SCM_\(GLOBAL_\)?\(G?PROC\|G?PROC1\|SYMBOL\|VCELL\|CONST_LONG\).*\"\([^\"]\)*\"/\3/' \
    --regex='/[ \t]*SCM_[G]?DEFINE1?[ \t]*(\([^,]*\),[^,]*/\1/'
@@ -48,7 +48,7 @@ gen_scmconfig_SOURCES = gen-scmconfig.c
 ## For some reason, OBJEXT does not include the dot
 gen-scmconfig.$(OBJEXT): gen-scmconfig.c
 	if [ "$(cross_compiling)" = "yes" ]; then \
-		$(CC_FOR_BUILD) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) -c -o $@ $<; \
+		$(CC_FOR_BUILD) $(DEFS) $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) -c -o $@ $<; \
 	else \
 		$(COMPILE) -c -o $@ $<; \
 	fi
@@ -76,7 +76,7 @@ guile_filter_doc_snarfage_SOURCES = c-tokenize.c
 ## For some reason, OBJEXT does not include the dot
 c-tokenize.$(OBJEXT): c-tokenize.c
 	if [ "$(cross_compiling)" = "yes" ]; then \
-		$(CC_FOR_BUILD) $(DEFS) $(INCLUDES) -c -o $@ $<; \
+		$(CC_FOR_BUILD) $(DEFS) $(AM_CPPFLAGS) -c -o $@ $<; \
 	else \
 		$(COMPILE) -c -o $@ $<; \
 	fi
@@ -94,7 +94,7 @@ guile_filter_doc_snarfage$(EXEEXT): $(guile_filter_doc_snarfage_OBJECTS) $(guile
 guile_SOURCES = guile.c
 guile_CFLAGS = $(GUILE_CFLAGS)
 guile_LDADD = libguile.la
-guile_LDFLAGS = @DLPREOPEN@ $(GUILE_CFLAGS)
+guile_LDFLAGS = $(GUILE_CFLAGS)
 
 libguile_la_CFLAGS = $(GUILE_CFLAGS)
 
@@ -214,11 +214,11 @@ bin_SCRIPTS = guile-snarf
 noinst_SCRIPTS = guile-doc-snarf guile-snarf-docs guile-func-name-check
 
 EXTRA_DIST = ChangeLog-gh ChangeLog-scm ChangeLog-threads		\
-    ChangeLog-1996-1999 ChangeLog-2000 cpp_signal.c			\
-    cpp_errno.c cpp_err_symbols.in cpp_err_symbols.c		\
-    cpp_sig_symbols.c cpp_sig_symbols.in cpp_cnvt.awk	\
-    c-tokenize.lex version.h.in \
-    scmconfig.h.top gettext.h
+    ChangeLog-1996-1999 ChangeLog-2000 ChangeLog-2008 cpp_signal.c	\
+    cpp_errno.c cpp_err_symbols.in cpp_err_symbols.c			\
+    cpp_sig_symbols.c cpp_sig_symbols.in cpp_cnvt.awk			\
+    c-tokenize.lex version.h.in						\
+    scmconfig.h.top gettext.h measure-hwm.scm
 #    $(DOT_DOC_FILES) $(EXTRA_DOT_DOC_FILES) \
 #    guile-procedures.txt guile.texi
 
@@ -270,7 +270,7 @@ libpath.h: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	@mv libpath.tmp libpath.h
 
 
-snarfcppopts = $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+snarfcppopts = $(DEFS) $(AM_CPPFLAGS) $(CPPFLAGS) $(CFLAGS)
 
 SUFFIXES = .x .doc
 .c.x:
@@ -313,6 +313,29 @@ guile-procedures.txt: guile-procedures.texi
 
 endif
 
+# Stack limit calibration for `make check'.  (For why we do this, see
+# the comments in measure-hwm.scm.)  We're relying here on a couple of
+# bits of Automake magic.
+#
+# 1. The fact that "libguile" comes before "test-suite" in SUBDIRS in
+# our toplevel Makefile.am.  This ensures that the
+# stack-limit-calibration.scm "test" will be run before any of the
+# tests under test-suite.
+#
+# 2. The fact that each test is invoked as $TESTS_ENVIRONMENT $test.
+# This allows us to ensure that the test will be considered to have
+# passed, by using `true' as TESTS_ENVIRONMENT.
+#
+# Why don't we care about the test "actually passing"?  Because the
+# important thing about stack-limit-calibration.scm is just that it is
+# generated in the first place, so that other tests under test-suite
+# can use it.
+TESTS = stack-limit-calibration.scm
+TESTS_ENVIRONMENT = true
+
+stack-limit-calibration.scm: measure-hwm.scm guile$(EXEEXT)
+	$(preinstguile) -s $(srcdir)/measure-hwm.scm > $@
+
 c-tokenize.c: c-tokenize.lex
 	flex -t $(srcdir)/c-tokenize.lex > $@ || { rm $@; false; }
 
@@ -320,7 +343,7 @@ schemelibdir = $(pkgdatadir)/$(GUILE_EFFECTIVE_VERSION)
 schemelib_DATA = guile-procedures.txt
 
 ## Add -MG to make the .x magic work with auto-dep code.
-MKDEP = gcc -M -MG $(DEFS) $(INCLUDES) $(CPPFLAGS) $(CFLAGS)
+MKDEP = gcc -M -MG $(DEFS) $(AM_CPPFLAGS) $(CPPFLAGS) $(CFLAGS)
 
 cpp_err_symbols.c: cpp_err_symbols.in cpp_cnvt.awk
 	$(AWK) -f $(srcdir)/cpp_cnvt.awk < $(srcdir)/cpp_err_symbols.in > \
@@ -367,7 +390,7 @@ MOSTLYCLEANFILES = \
 	cpp_err_symbols_here cpp_err_symbols_diff cpp_err_symbols_new \
 	cpp_sig_symbols_here cpp_sig_symbols_diff cpp_sig_symbols_new \
 	version.h version.h.tmp \
-	scmconfig.h scmconfig.h.tmp
+	scmconfig.h scmconfig.h.tmp stack-limit-calibration.scm
 
 CLEANFILES = libpath.h *.x *.doc guile-procedures.txt guile-procedures.texi guile.texi
 

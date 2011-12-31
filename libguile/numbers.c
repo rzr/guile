@@ -1,4 +1,4 @@
-/* Copyright (C) 1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+/* Copyright (C) 1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
  *
  * Portions Copyright 1990, 1991, 1992, 1993 by AT&T Bell Laboratories
  * and Bellcore.  See scm_divide.
@@ -40,10 +40,7 @@
 
  */
 
-/* tell glibc (2.3) to give prototype for C99 trunc(), csqrt(), etc */
-#define _GNU_SOURCE
-
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
@@ -640,6 +637,13 @@ guile_ieee_init (void)
 
 #if defined (HAVE_ISNAN)
 
+#if defined __GNUC__ && defined __alpha__ && !defined _IEEE_FP
+  /* On Alpha GCC must be passed `-mieee' to provide proper NaN handling.
+     See http://lists.gnu.org/archive/html/bug-gnulib/2009-05/msg00010.html
+     for more details.  */
+# error NaN handling will not work when compiling without -mieee
+#endif
+
 #ifdef NAN
   /* C99 NAN, when available */
   guile_NaN = NAN;
@@ -1025,7 +1029,7 @@ SCM
 scm_gcd (SCM x, SCM y)
 {
   if (SCM_UNBNDP (y))
-    return SCM_UNBNDP (x) ? SCM_INUM0 : x;
+    return SCM_UNBNDP (x) ? SCM_INUM0 : scm_abs (x);
   
   if (SCM_I_INUMP (x))
     {
@@ -2735,6 +2739,10 @@ mem2ureal (const char* mem, size_t len, unsigned int *p_idx,
   unsigned int idx = *p_idx;
   SCM result;
 
+  /* Start off believing that the number will be exact.  This changes
+     to INEXACT if we see a decimal point or a hash. */
+  enum t_exactness x = EXACT;
+
   if (idx == len)
     return SCM_BOOL_F;
 
@@ -2746,8 +2754,6 @@ mem2ureal (const char* mem, size_t len, unsigned int *p_idx,
 
   if (idx+4 < len && !strncmp (mem+idx, "nan.", 4))
     {
-      enum t_exactness x = EXACT;
-
       /* Cobble up the fractional part.  We might want to set the
 	 NaN's mantissa from it. */
       idx += 4;
@@ -2766,11 +2772,10 @@ mem2ureal (const char* mem, size_t len, unsigned int *p_idx,
 	return SCM_BOOL_F;
       else
 	result = mem2decimal_from_point (SCM_I_MAKINUM (0), mem, len,
-					 p_idx, p_exactness);
+					 p_idx, &x);
     }
   else
     {
-      enum t_exactness x = EXACT;
       SCM uinteger;
 
       uinteger = mem2uinteger (mem, len, &idx, radix, &x);
@@ -2802,9 +2807,15 @@ mem2ureal (const char* mem, size_t len, unsigned int *p_idx,
 	result = uinteger;
 
       *p_idx = idx;
-      if (x == INEXACT)
-	*p_exactness = x;
     }
+
+  /* Update *p_exactness if the number just read was inexact.  This is
+     important for complex numbers, so that a complex number is
+     treated as inexact overall if either its real or imaginary part
+     is inexact.
+  */
+  if (x == INEXACT)
+    *p_exactness = x;
 
   /* When returning an inexact zero, make sure it is represented as a
      floating point value so that we can change its sign. 
@@ -5355,7 +5366,12 @@ SCM
 scm_c_make_polar (double mag, double ang)
 {
   double s, c;
-#if HAVE_SINCOS
+
+  /* The sincos(3) function is undocumented an broken on Tru64.  Thus we only
+     use it on Glibc-based systems that have it (it's a GNU extension).  See
+     http://lists.gnu.org/archive/html/guile-user/2009-04/msg00033.html for
+     details.  */
+#if (defined HAVE_SINCOS) && (defined __GLIBC__) && (defined _GNU_SOURCE)
   sincos (ang, &s, &c);
 #else
   s = sin (ang);
@@ -5599,8 +5615,18 @@ SCM_DEFINE (scm_inexact_to_exact, "inexact->exact", 1, 0, 0,
 #undef FUNC_NAME
 
 SCM_DEFINE (scm_rationalize, "rationalize", 2, 0, 0, 
-            (SCM x, SCM err),
-	    "Return an exact number that is within @var{err} of @var{x}.")
+            (SCM x, SCM eps),
+	    "Returns the @emph{simplest} rational number differing\n"
+	    "from @var{x} by no more than @var{eps}.\n"
+	    "\n"
+	    "As required by @acronym{R5RS}, @code{rationalize} only returns an\n"
+	    "exact result when both its arguments are exact.  Thus, you might need\n"
+	    "to use @code{inexact->exact} on the arguments.\n"
+	    "\n"
+	    "@lisp\n"
+	    "(rationalize (inexact->exact 1.2) 1/100)\n"
+	    "@result{} 6/5\n"
+	    "@end lisp")
 #define FUNC_NAME s_scm_rationalize
 {
   if (SCM_I_INUMP (x))
@@ -5632,7 +5658,7 @@ SCM_DEFINE (scm_rationalize, "rationalize", 2, 0, 0,
 	 converges after less than a dozen iterations.
       */
 
-      err = scm_abs (err);
+      eps = scm_abs (eps);
       while (++i < 1000000)
 	{
 	  a = scm_sum (scm_product (a1, tt), a2);    /* a = a1*tt + a2 */
@@ -5640,11 +5666,11 @@ SCM_DEFINE (scm_rationalize, "rationalize", 2, 0, 0,
 	  if (scm_is_false (scm_zero_p (b)) &&         /* b != 0 */
 	      scm_is_false 
 	      (scm_gr_p (scm_abs (scm_difference (ex, scm_divide (a, b))),
-			 err)))                      /* abs(x-a/b) <= err */
+			 eps)))                      /* abs(x-a/b) <= eps */
 	    {
 	      SCM res = scm_sum (int_part, scm_divide (a, b));
 	      if (scm_is_false (scm_exact_p (x))
-		  || scm_is_false (scm_exact_p (err)))
+		  || scm_is_false (scm_exact_p (eps)))
 		return scm_exact_to_inexact (res);
 	      else
 		return res;

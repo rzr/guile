@@ -1,8 +1,5 @@
 /* guile-readline-config.h.in.  Generated from configure.in by autoheader.  */
 
-/* Define if readline disables SA_RESTART. */
-#undef GUILE_SIGWINCH_SA_RESTART_CLEARED
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -30,9 +27,6 @@
 /* Define to 1 if you have the `rl_get_keymap' function. */
 #undef HAVE_RL_GET_KEYMAP
 
-/* Define if rl_pre_input_hook is available. */
-#undef HAVE_RL_PRE_INPUT_HOOK
-
 /* Define to 1 if you have the `siginterrupt' function. */
 #undef HAVE_SIGINTERRUPT
 
@@ -59,6 +53,10 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT

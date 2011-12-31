@@ -1,4 +1,4 @@
-/* Copyright (C) 1995,1996,1997,1998,2000,2001, 2002, 2004, 2006 Free Software Foundation, Inc.
+/* Copyright (C) 1995,1996,1997,1998,2000,2001, 2002, 2004, 2006, 2008 Free Software Foundation, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,7 @@
 
 
 
-#if HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
@@ -152,7 +152,7 @@ scm_async_click ()
      invoked even when pending_asyncs is zero.
   */
 
-  scm_i_scm_pthread_mutex_lock (&async_mutex);
+  scm_i_pthread_mutex_lock (&async_mutex);
   t->pending_asyncs = 0;
   if (t->block_asyncs == 0)
     {
@@ -177,7 +177,7 @@ scm_async_click ()
 SCM_DEFINE (scm_system_async, "system-async", 1, 0, 0,
             (SCM thunk),
 	    "This function is deprecated.  You can use @var{thunk} directly\n"
-            "instead of explicitely creating an async object.\n")
+            "instead of explicitly creating an async object.\n")
 #define FUNC_NAME s_scm_system_async
 {
   scm_c_issue_deprecation_warning 
@@ -197,7 +197,7 @@ scm_i_queue_async_cell (SCM c, scm_i_thread *t)
   int sleep_fd;
   SCM p;
   
-  scm_i_scm_pthread_mutex_lock (&async_mutex);
+  scm_i_pthread_mutex_lock (&async_mutex);
   p = t->active_asyncs;
   SCM_SETCDR (c, SCM_EOL);
   if (!scm_is_pair (p))
@@ -240,14 +240,15 @@ scm_i_queue_async_cell (SCM c, scm_i_thread *t)
 
   if (sleep_fd >= 0)
     {
+      size_t count;
       char dummy = 0;
+
       /* Likewise, T might already been done with sleeping here, but
 	 interrupting it once too often does no harm.  T might also
 	 not yet have started sleeping, but this is no problem either
 	 since the data written to a pipe will not be lost, unlike a
-	 condition variable signal.
-      */
-      write (sleep_fd, &dummy, 1);
+	 condition variable signal.  */
+      count = write (sleep_fd, &dummy, 1);
     }
 
   /* This is needed to protect sleep_mutex.
@@ -262,7 +263,7 @@ scm_i_setup_sleep (scm_i_thread *t,
 {
   int pending;
 
-  scm_i_scm_pthread_mutex_lock (&async_mutex);
+  scm_i_pthread_mutex_lock (&async_mutex);
   pending = t->pending_asyncs;
   if (!pending)
     {
@@ -277,7 +278,7 @@ scm_i_setup_sleep (scm_i_thread *t,
 void
 scm_i_reset_sleep (scm_i_thread *t)
 {
-  scm_i_scm_pthread_mutex_lock (&async_mutex);
+  scm_i_pthread_mutex_lock (&async_mutex);
   t->sleep_object = SCM_BOOL_F;
   t->sleep_mutex = NULL;
   t->sleep_fd = -1;

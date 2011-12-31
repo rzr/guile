@@ -5,6 +5,7 @@ Contributors since the last release:
          Julian Graham
          Stefan Jahn
            Neil Jerram
+        Gregory Marton
         Antoine Mathys
       Thien-Thi Nguyen
         Han-Wen Nienhuys
@@ -22,6 +23,8 @@ For fixes or providing information which led to a fix:
           David Allouche
 	 Martin Baulig
         Fabrice Bauzac
+        Sylvain Beucler
+          Carlo Bramini
             Rob Browning
          Adrian Bunk
         Michael Carmack
@@ -34,15 +37,21 @@ For fixes or providing information which led to a fix:
            Nils Durner
          John W Eaton
 	Clinton Ebadi
+          David Fang
+          Barry Fishman
         Charles Gagnon
           Peter Gavin
            Eric Gillespie, Jr
+         Didier Godefroy
+  Panicz Maciej Godek
            John Goerzen
            Mike Gran
          Szavai Gyula
+         Roland Haeder
 	   Sven Hartrumpf
 	   Eric Hanchrow
             Sam Hocevar
+	Patrick Horgan
            Ales Hvezda
           Peter Ivanyi
        Wolfgang Jaehrling
@@ -54,6 +63,7 @@ For fixes or providing information which led to a fix:
            René Köcher
        Matthias Köppe
            Matt Kraai
+         Daniel Kraft
            Jeff Long
 	  Marco Maggi
         Gregory Marton
@@ -66,6 +76,7 @@ For fixes or providing information which led to a fix:
          Hrvoje Nikšić
          Stefan Nordhausen
          Roland Orre
+	  Peter O'Gorman
          Pieter Pareit
            Jack Pavlovsky
            Arno Peters
@@ -77,6 +88,7 @@ For fixes or providing information which led to a fix:
          Werner Scheinast
 	   Bill Schottstaedt
 	  Frank Schwidom
+         Thiemo Seufer
           Scott Shedden
            Alex Shinn
          Daniel Skarda
@@ -88,6 +100,7 @@ For fixes or providing information which led to a fix:
        Aaron M. Ucko
         Stephen Uitti
         Momchil Velikov
+	  Linas Vepstas
      Panagiotis Vossos
         Neil W. Van Dyke
           Aaron VanDevender
