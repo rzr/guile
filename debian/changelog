@@ -1,7 +1,13 @@
-guile-1.8 (0:1.8.7+1-3.0~rzr1) unstable; urgency=low
+guile-1.8 (0:1.8.7+1-3.0~rzr2) unstable; urgency=low
 
   * Non-maintainer upload.
   * http://rzr.online.fr/q/harmattan
+
+ -- Philippe Coval <rzr@gna.org>  Sat, 31 Dec 2011 16:20:45 +0100
+
+guile-1.8 (0:1.8.7+1-3.0~rzr1) unstable; urgency=low
+
+  * depends on alternate readline
 
  -- Philippe Coval <rzr@gna.org>  Sat, 31 Dec 2011 15:02:22 +0100
 

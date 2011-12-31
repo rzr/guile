@@ -28,7 +28,9 @@ Section: lisp
 Architecture: any
 Provides: libguile-dev
 Conflicts: libguile-dev, guile-1.6 (<< 1.6.8-5)
-Depends: ${shlibs:Depends}, guile-1.8, libc6-dev, libncurses5-dev, libreadline6-dev, libltdl3-dev, libgmp3-dev, ${misc:Depends}
+Depends: ${shlibs:Depends}, guile-1.8, libc6-dev, libncurses5-dev
+ , libreadline6-dev | libreadline5-dev
+ , libltdl3-dev, libgmp3-dev, ${misc:Depends}
 Description: Development files for Guile 1.8
  This package contains files needed for development using Guile 1.8.
  .
